@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Elo Leaderboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --page-bg: #0a1223;
+            --card-bg: #14203a;
+            --border: rgba(92, 126, 183, 0.35);
+            --text: #e8ecf5;
+            --muted: #90a1c0;
+            --accent: #2db7ff;
+            --accent2: #20e8c5;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; background: radial-gradient(circle at top, #1b2f55 0%, #0a1223 70%); color: var(--text); font-family: 'Montserrat', sans-serif; }
+
+        .container { width: min(1700px, 96%); margin: 14px auto 30px; }
+        h1 { margin: 0 0 14px; color: #f5f8ff; font-size: 2.2rem; }
+
+        .mode-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .mode-nav button { border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: var(--text); border-radius: 999px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
+        .mode-nav button.active { background: linear-gradient(135deg, #2e9cff, #1de6b2); color: #041124; border-color: transparent; }
+
+        .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(18, 27, 44, 0.78); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 22px; }
+        .controls label { color: var(--muted); font-size: 0.92rem; font-weight: 600; }
+        .controls select, .controls input[type=checkbox] { background: #0f1a35; color: var(--text); border: 1px solid #2d3b63; border-radius: 8px; padding: 7px 10px; font-size: 0.92rem; }
+        .controls .right-item { margin-left: auto; }
+
+        .leaderboard { display: grid; gap: 10px; }
+        .player-row { display: grid; grid-template-columns: 68px 1.2fr 90px 360px; gap: 10px; align-items: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 15px; transition: transform .16s ease, border-color .16s ease; }
+        .player-row:hover { transform: translateY(-1px); border-color: #499fff; }
+
+        .rank-badge { width: 47px; height: 47px; border-radius: 50%; background: linear-gradient(145deg, #fedd88, #ff9800); color: #141312; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; font-size: 1.05rem; }
+
+        .player-meta { display: flex; align-items: center; gap: 10px; }
+        .player-meta img { width: 56px; height: 56px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.18); object-fit: cover; }
+
+        .name-info { display: grid; gap: 2px; }
+        .name { font-size: 1.3rem; color: #fff; font-weight: 700; }
+        .subtitle { color: var(--muted); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+
+        .region-pill { border-radius: 10px; font-weight: 700; letter-spacing: .04em; font-size: 0.78rem; padding: 7px 11px; text-transform: uppercase; width: fit-content; }
+        .region-NA { background: #4d1e2a; color: #ffb2ca; }
+        .region-EU { background: #1a4530; color: #8ef5c8; }
+        .region-AS { background: #2b1d4f; color: #c9afff; }
+
+        .no-data { padding: 38px 16px; border-radius: 12px; background: rgba(22, 34, 57, 0.75); border: 1px dashed rgba(148, 170, 208, 0.4); color: var(--muted); text-align: center; font-size: 0.96rem; }
+
+        @media (max-width: 1180px) {
+            .player-row { grid-template-columns: 58px 1.25fr 90px 1fr; }
+            .container { width: 98%; }
+        }
+        @media (max-width: 860px) {
+            .player-row { grid-template-columns: 52px 1fr; grid-template-areas: "rank name" "region region" "tiers tiers" "elo elo"; row-gap: 8px; }
+            .rank-badge { grid-area: rank; }
+            .player-meta { grid-area: name; }
+            .region-pill { grid-area: region; }
+            .tiers-wrap { grid-area: tiers; }
+            .player-meta img { width: 46px; height: 46px; }
+            .name { font-size: 1.1rem; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>MCELO Leaderboard</h1>
+
+    <div class="mode-nav" id="modeNav">
+        <button class="active" data-kit="overall">Overall</button>
+        <button data-kit="vanilla">Vanilla</button>
+        <button data-kit="uhc">UHC</button>
+        <button data-kit="pot">Pot</button>
+        <button data-kit="nethop">NethOP</button>
+        <button data-kit="smp">SMP</button>
+        <button data-kit="sword">Sword</button>
+        <button data-kit="axe">Axe</button>
+        <button data-kit="mace">Mace</button>
+    </div>
+
+    <div class="controls">
+        <div>x
+            <label for="kitSelect">Select Leaderboard:</label>
+            <select id="kitSelect" onchange="renderTable()">
+                <option value="overall">Overall (Average)</option>
+            </select>
+        </div>
+        <div class="right-item">
+            <label><input type="checkbox" id="verifiedCheck" onchange="renderTable()"> Verified Only</label>
+        </div>
+    </div>
+
+    <div class="leaderboard" id="leaderboardBody"></div>
+</div>
+
+<script>
+    let rawData = [];
+    let kits = new Set();
+
+    // Initialize SQL.js
+    initSqlJs({
+        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+    }).then(function(SQL) {
+        // Fetch the raw database file
+        fetch('database.db?t=' + new Date().getTime()) // Prevent caching
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.arrayBuffer();
+            })
+            .then(buffer => {
+                const db = new SQL.Database(new Uint8Array(buffer));
+                
+                // Query the player stats
+                const stmt = db.prepare("SELECT * FROM player_stats");
+                rawData = [];
+
+                while(stmt.step()) {
+                    const row = stmt.getAsObject();
+                    const kitsObj = {};
+                    let totalElo = 0;
+                    let count = 0;
+
+                    // Parse the "kit:elo,kit2:elo2" string
+                    if (row.elo_data) {
+                        row.elo_data.split(',').forEach(part => {
+                            const [k, v] = part.split(':');
+                            if (k && v) {
+                                const val = parseInt(v);
+                                kitsObj[k] = val;
+                                kits.add(k);
+                                totalElo += val;
+                                count++;
+                            }
+                        });
+                    }
+
+                    rawData.push({
+                        uuid: row.uuid,
+                        username: row.username,
+                        verified: !!row.verified, // Convert 0/1 to boolean
+                        kits: kitsObj,
+                        overall: count > 0 ? Math.round(totalElo / count) : 1000,
+                        region: 'NA' // Default region (not in DB)
+                    });
+                }
+                stmt.free();
+
+                populateKitDropdown();
+                renderTable();
+            })
+            .catch(err => {
+                console.error('Could not load database.db', err);
+                document.getElementById('leaderboardBody').innerHTML = '<div class="no-data">Unable to load database.db. Ensure the file is in the same folder.</div>';
+            });
+    });
+
+    function populateKitDropdown() {
+        const select = document.getElementById('kitSelect');
+        kits.forEach(kit => {
+            const option = document.createElement('option');
+            option.value = kit;
+            option.innerText = kit.charAt(0).toUpperCase() + kit.slice(1);
+            select.appendChild(option);
+        });
+    }
+
+    function getRegionClass(region) {
+        if (!region) return 'region-NA';
+        const key = region.toUpperCase();
+        if (key === 'EU') return 'region-EU';
+        if (key === 'AS') return 'region-AS';
+        return 'region-NA';
+    }
+
+    function scoreTier(score) {
+        if (score > 400) return 'HT';
+        if (score > 250) return 'MT';
+        return 'LT';
+    }
+
+    function renderTable() {
+        const board = document.getElementById('leaderboardBody');
+        board.innerHTML = '';
+
+        const selectedKit = document.getElementById('kitSelect').value;
+        const verifiedOnly = document.getElementById('verifiedCheck').checked;
+
+        const displayData = rawData
+            .filter(player => !verifiedOnly || player.verified)
+            .map(player => {
+                const elo = selectedKit === 'overall' ? player.overall : (player.kits?.[selectedKit] ?? 0);
+                return { ...player, currentElo: elo };
+            })
+            .sort((a, b) => (b.currentElo ?? 0) - (a.currentElo ?? 0));
+
+        if (!displayData.length) {
+            board.innerHTML = '<div class="no-data">No players match your filter.</div>';
+            return;
+        }
+
+        displayData.forEach((player, idx) => {
+            const avatar = player.uuid ?
+                `https://crafatar.com/avatars/${player.uuid}?size=56&overlay` :
+                `https://crafatar.com/avatars/8667ba71b85a4004af54457a9734ef89?size=56&overlay`;
+
+            const region = player.region || 'NA';
+            const tierElements = Object.entries(player.kits || {}).slice(0,8).map(([kit,value]) => {
+                const tier = scoreTier(value);
+                return `<span class="tier-pill tier-${tier}">${kit.slice(0,2).toUpperCase()} ${tier}</span>`;
+            }).join('');
+
+            board.innerHTML += `
+                <div class="player-row">
+                    <span class="rank-badge">${idx + 1}</span>
+                    <div class="player-meta">
+                        <img src="${avatar}" alt="${player.username || 'Player'} avatar">
+                        <div class="name-info">
+                            <span class="name">${player.username || 'Unknown'}</span>
+                            <span class="subtitle">
+                                ${player.verified ? '✔ Combat Grandmaster' : 'Combat Challenger'}
+                                ${player.verified ? '<span style="color:#7cf6b3; font-weight:700;">(Verified)</span>' : ''}
+                            </span>
+                        </div>
+                    </div>
+                    <span class="region-pill ${getRegionClass(region)}">${region}</span>
+                    <div class="tiers-wrap">${tierElements || '<span class="tier-pill">--</span>'}</div>
+                </div>`;
+        });
+    }
+
+    document.getElementById('modeNav').addEventListener('click', e => {
+        if (e.target.tagName !== 'BUTTON') return;
+        document.querySelectorAll('.mode-nav button').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        const kit = e.target.getAttribute('data-kit');
+        const select = document.getElementById('kitSelect');
+        if ([...select.options].find(o => o.value === kit)) {
+            select.value = kit;
+            renderTable();
+        }
+    });
+</script>
+
+</body>
+</html>

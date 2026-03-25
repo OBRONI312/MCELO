@@ -56,14 +56,5 @@ The plugin starts a web server on port `8081` by default.
 ### Building
 This project is designed to be built with Maven or Gradle. Ensure you include the WorldEdit and PlaceholderAPI repositories in your build configuration.
 
-## 📝 Configuration
 
-The plugin currently uses a hardcoded database path at `/home/obroni/MCELO/plugins/EloPractice/database.db` with an automatic fallback to the local plugin folder if that path is inaccessible.
-
-```yaml
-# config.yml
-prefix: "&6[EloPractice] "
-```
-
----
 *Developed for competitive Minecraft communities.*

@@ -1,6 +1,6 @@
 # MCELO
 
-A high-performance, feature-rich Minecraft Practice plugin designed for 1.21.1 competitive play. This plugin provides a complete ranked environment with Elo ratings, personalized kit layouts, and automated arena management.
+A high-performance, feature-rich Minecraft Practice plugin designed for 1.21.11 competitive play. This plugin provides a complete ranked environment with Elo ratings, personalized kit layouts, and automated arena management.
 
 ## 🚀 Features
 

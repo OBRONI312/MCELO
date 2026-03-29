@@ -21,6 +21,17 @@
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+        <!-- Paper Snapshots Repo -->
+        <repository>
+            <id>papermc-snapshots</id>
+            <url>https://repo.papermc.io/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
         <!-- EngineHub Repo (WorldEdit) -->
         <repository>
             <id>enginehub</id>

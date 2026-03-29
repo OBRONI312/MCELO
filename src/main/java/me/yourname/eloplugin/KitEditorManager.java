@@ -159,9 +159,9 @@ public class KitEditorManager {
         if (item == null || item.getType() == Material.AIR) return;
         
         List<Enchantment> possible = new ArrayList<>();
-        // Fix for Paper 1.21: Use supported method to iterate enchantments
         try {
-            for (Enchantment ench : Enchantment.values()) {
+            // Modern 1.21 Registry iteration
+            for (Enchantment ench : org.bukkit.Registry.ENCHANTMENT) {
                 if (ench.canEnchantItem(item)) possible.add(ench);
             }
         } catch (Exception e) {

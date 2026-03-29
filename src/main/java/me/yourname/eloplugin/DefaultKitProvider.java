@@ -261,7 +261,7 @@ public class DefaultKitProvider {
         ItemStack sword = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta sMeta = sword.getItemMeta();
         if (sMeta != null) {
-            applySafeEnchants(sMeta, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(sMeta, "sharpness", 5, "unbreaking", 3, "mending", 1);
             sword.setItemMeta(sMeta);
         }
         items[0] = sword;
@@ -293,7 +293,7 @@ public class DefaultKitProvider {
         ItemStack mace1 = new ItemStack(Material.MACE);
         ItemMeta m1 = mace1.getItemMeta();
         if (m1 != null) {
-            applySafeEnchants(m1, "BREACH", 4, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(m1, "breach", 4, "unbreaking", 3, "mending", 1);
             mace1.setItemMeta(m1);
         }
         items[0] = mace1;
@@ -302,7 +302,7 @@ public class DefaultKitProvider {
         ItemStack mace2 = new ItemStack(Material.MACE);
         ItemMeta m2 = mace2.getItemMeta();
         if (m2 != null) {
-            applySafeEnchants(m2, "DENSITY", 5, "DURABILITY", 3, "MENDING", 1, "WIND_BURST", 3);
+            applySafeEnchants(m2, "density", 5, "unbreaking", 3, "mending", 1, "wind_burst", 3);
             mace2.setItemMeta(m2);
         }
         items[1] = mace2;
@@ -311,7 +311,7 @@ public class DefaultKitProvider {
         ItemStack sword = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta mSword = sword.getItemMeta();
         if (mSword != null) {
-            applySafeEnchants(mSword, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "KNOCKBACK", 1);
+            applySafeEnchants(mSword, "sharpness", 5, "unbreaking", 3, "mending", 1, "knockback", 1);
             sword.setItemMeta(mSword);
         }
         items[2] = sword;
@@ -320,7 +320,7 @@ public class DefaultKitProvider {
         ItemStack axe = new ItemStack(Material.NETHERITE_AXE);
         ItemMeta mAxe = axe.getItemMeta();
         if (mAxe != null) {
-            applySafeEnchants(mAxe, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "DIG_SPEED", 5);
+            applySafeEnchants(mAxe, "sharpness", 5, "unbreaking", 3, "mending", 1, "efficiency", 5);
             axe.setItemMeta(mAxe);
         }
         items[3] = axe;
@@ -335,7 +335,7 @@ public class DefaultKitProvider {
         ItemStack shield = new ItemStack(Material.SHIELD);
         ItemMeta mShield = shield.getItemMeta();
         if (mShield != null) {
-            applySafeEnchants(mShield, "DURABILITY", 2);
+            applySafeEnchants(mShield, "unbreaking", 2);
             shield.setItemMeta(mShield);
         }
         items[8] = shield;
@@ -365,13 +365,13 @@ public class DefaultKitProvider {
 
         // --- Armor ---
         // Boots: Prot 4, Unb 3, Mend, FF 4, Depth 3, Soul Speed 3
-        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "PROTECTION_FALL", 4, "DEPTH_STRIDER", 3, "SOUL_SPEED", 3);
+        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed", 3);
         // Leggings: Prot 4, Unb 3, Mend, Swift Sneak 3
-        items[37] = createMaceArmor(Material.NETHERITE_LEGGINGS, "SWIFT_SNEAK", 3, null, 0, null, 0);
+        items[37] = createMaceArmor(Material.NETHERITE_LEGGINGS, "swift_sneak", 3, null, 0, null, 0);
         // Chest: Prot 4, Unb 3, Mend
         items[38] = createMaceArmor(Material.NETHERITE_CHESTPLATE, null, 0, null, 0, null, 0);
-        // Helmet: Prot 4, Unb 3, Mend, Respiration 3 (OXYGEN), Aqua Affinity (WATER_WORKER)
-        items[39] = createMaceArmor(Material.NETHERITE_HELMET, "OXYGEN", 3, "WATER_WORKER", 1, null, 0);
+        // Helmet: Prot 4, Unb 3, Mend, Respiration 3, Aqua Affinity
+        items[39] = createMaceArmor(Material.NETHERITE_HELMET, "respiration", 3, "aqua_affinity", 1, null, 0);
 
         items[40] = new ItemStack(Material.TOTEM_OF_UNDYING); // Offhand Totem
         return items;
@@ -382,18 +382,18 @@ public class DefaultKitProvider {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            applySafeEnchants(meta, "PROTECTION_ENVIRONMENTAL", 4, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(meta, "protection", 4, "unbreaking", 3, "mending", 1);
             
             if (ench1 != null) {
-                Enchantment e1 = Enchantment.getByName(ench1);
+                Enchantment e1 = getEnchantment(ench1);
                 if (e1 != null) meta.addEnchant(e1, lvl1, true);
             }
             if (ench2 != null) {
-                Enchantment e2 = Enchantment.getByName(ench2);
+                Enchantment e2 = getEnchantment(ench2);
                 if (e2 != null) meta.addEnchant(e2, lvl2, true);
             }
             if (ench3 != null) {
-                Enchantment e3 = Enchantment.getByName(ench3);
+                Enchantment e3 = getEnchantment(ench3);
                 if (e3 != null) meta.addEnchant(e3, lvl3, true);
             }
             item.setItemMeta(meta);
@@ -408,7 +408,7 @@ public class DefaultKitProvider {
         ItemStack sword1 = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta m1 = sword1.getItemMeta();
         if (m1 != null) {
-            applySafeEnchants(m1, "DAMAGE_ALL", 5, "MENDING", 1, "DURABILITY", 3);
+            applySafeEnchants(m1, "sharpness", 5, "mending", 1, "unbreaking", 3);
             sword1.setItemMeta(m1);
         }
         items[0] = sword1;
@@ -417,7 +417,7 @@ public class DefaultKitProvider {
         ItemStack sword2 = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta m2 = sword2.getItemMeta();
         if (m2 != null) {
-            applySafeEnchants(m2, "DAMAGE_ALL", 5, "MENDING", 1, "DURABILITY", 3, "KNOCKBACK", 1);
+            applySafeEnchants(m2, "sharpness", 5, "mending", 1, "unbreaking", 3, "knockback", 1);
             sword2.setItemMeta(m2);
         }
         items[1] = sword2;
@@ -426,7 +426,7 @@ public class DefaultKitProvider {
         ItemStack axe = new ItemStack(Material.NETHERITE_AXE);
         ItemMeta mAxe = axe.getItemMeta();
         if (mAxe != null) {
-            applySafeEnchants(mAxe, "DAMAGE_ALL", 5, "MENDING", 1, "DURABILITY", 3);
+            applySafeEnchants(mAxe, "sharpness", 5, "mending", 1, "unbreaking", 3);
             axe.setItemMeta(mAxe);
         }
         items[2] = axe;
@@ -463,7 +463,7 @@ public class DefaultKitProvider {
         ItemStack shield = new ItemStack(Material.SHIELD);
         ItemMeta sMeta = shield.getItemMeta();
         if (sMeta != null) {
-            applySafeEnchants(sMeta, "MENDING", 1, "DURABILITY", 3);
+            applySafeEnchants(sMeta, "mending", 1, "unbreaking", 3);
             shield.setItemMeta(sMeta);
         }
         items[40] = shield;
@@ -475,7 +475,7 @@ public class DefaultKitProvider {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            applySafeEnchants(meta, "PROTECTION_ENVIRONMENTAL", 4, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(meta, "protection", 4, "unbreaking", 3, "mending", 1);
             item.setItemMeta(meta);
         }
         return item;
@@ -518,7 +518,7 @@ public class DefaultKitProvider {
         ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta mSword = sword.getItemMeta();
         if (mSword != null) {
-            applySafeEnchants(mSword, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "FIRE_ASPECT", 2);
+            applySafeEnchants(mSword, "sharpness", 5, "unbreaking", 3, "mending", 1, "fire_aspect", 2);
             sword.setItemMeta(mSword);
         }
         items[0] = sword;
@@ -527,7 +527,7 @@ public class DefaultKitProvider {
         ItemStack axe = new ItemStack(Material.DIAMOND_AXE);
         ItemMeta mAxe = axe.getItemMeta();
         if (mAxe != null) {
-            applySafeEnchants(mAxe, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "DIG_SPEED", 5);
+            applySafeEnchants(mAxe, "sharpness", 5, "unbreaking", 3, "mending", 1, "efficiency", 5);
             axe.setItemMeta(mAxe);
         }
         items[1] = axe;
@@ -536,7 +536,7 @@ public class DefaultKitProvider {
         ItemStack pick = new ItemStack(Material.DIAMOND_PICKAXE);
         ItemMeta mPick = pick.getItemMeta();
         if (mPick != null) {
-            applySafeEnchants(mPick, "DIG_SPEED", 5, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(mPick, "efficiency", 5, "unbreaking", 3, "mending", 1);
             pick.setItemMeta(mPick);
         }
         items[2] = pick;
@@ -568,7 +568,7 @@ public class DefaultKitProvider {
         ItemStack boots = new ItemStack(Material.DIAMOND_BOOTS);
         ItemMeta mBoots = boots.getItemMeta();
         if (mBoots != null) {
-            applySafeEnchants(mBoots, "PROTECTION_ENVIRONMENTAL", 3, "DURABILITY", 3, "MENDING", 1, "PROTECTION_FALL", 4, "DEPTH_STRIDER", 3);
+            applySafeEnchants(mBoots, "protection", 3, "unbreaking", 3, "mending", 1, "feather_falling", 4, "depth_strider", 3);
             boots.setItemMeta(mBoots);
         }
         items[36] = boots;
@@ -577,7 +577,7 @@ public class DefaultKitProvider {
         ItemStack legs = new ItemStack(Material.DIAMOND_LEGGINGS);
         ItemMeta mLegs = legs.getItemMeta();
         if (mLegs != null) {
-            applySafeEnchants(mLegs, "PROTECTION_ENVIRONMENTAL", 3, "DURABILITY", 3, "MENDING", 1, "SWIFT_SNEAK", 3);
+            applySafeEnchants(mLegs, "protection", 3, "unbreaking", 3, "mending", 1, "swift_sneak", 3);
             legs.setItemMeta(mLegs);
         }
         items[37] = legs;
@@ -586,7 +586,7 @@ public class DefaultKitProvider {
         ItemStack chest = new ItemStack(Material.DIAMOND_CHESTPLATE);
         ItemMeta mChest = chest.getItemMeta();
         if (mChest != null) {
-            applySafeEnchants(mChest, "PROTECTION_ENVIRONMENTAL", 3, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(mChest, "protection", 3, "unbreaking", 3, "mending", 1);
             chest.setItemMeta(mChest);
         }
         items[38] = chest;
@@ -595,7 +595,7 @@ public class DefaultKitProvider {
         ItemStack helm = new ItemStack(Material.DIAMOND_HELMET);
         ItemMeta mHelm = helm.getItemMeta();
         if (mHelm != null) {
-            applySafeEnchants(mHelm, "PROTECTION_ENVIRONMENTAL", 3, "DURABILITY", 3, "MENDING", 1, "OXYGEN", 3);
+            applySafeEnchants(mHelm, "protection", 3, "unbreaking", 3, "mending", 1, "respiration", 3);
             helm.setItemMeta(mHelm);
         }
         items[39] = helm;
@@ -606,21 +606,34 @@ public class DefaultKitProvider {
         return items;
     }
 
-    @SuppressWarnings("deprecation")
     private static void applySafeEnchants(ItemMeta meta, Object... params) {
         for (int i = 0; i < params.length; i += 2) {
             String name = ((Object) params[i]).toString().toLowerCase();
             int level = (int) params[i+1];
-            
-            // Map old legacy names to new namespacedkey names
-            String key = name.replace("_all", "").replace("infinity", "infinity");
-            
-            Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(key));
+            Enchantment ench = getEnchantment(name);
 
             if (ench != null && meta != null) {
                 meta.addEnchant(ench, level, true);
             }
         }
+    }
+
+    private static Enchantment getEnchantment(String name) {
+        if (name == null) return null;
+        // Modern lookup using NamespacedKey
+        Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(name.toLowerCase()
+                .replace("protection_environmental", "protection")
+                .replace("damage_all", "sharpness")
+                .replace("dig_speed", "efficiency")
+                .replace("durability", "unbreaking")
+                .replace("protection_fall", "feather_falling")
+                .replace("oxygen", "respiration")
+                .replace("water_worker", "aqua_affinity")
+                .replace("arrow_damage", "power")
+                .replace("arrow_knockback", "punch")
+                .replace("arrow_fire", "flame")
+                .replace("arrow_infinite", "infinity")));
+        return ench;
     }
 
     private static ItemStack[] getSpearMaceKit() {
@@ -635,9 +648,9 @@ public class DefaultKitProvider {
         ItemMeta sMeta = spear.getItemMeta();
         if (sMeta != null) {
             sMeta.setDisplayName("§3Netherite Spear");
-            applySafeEnchants(sMeta, "DURABILITY", 3, "DAMAGE_ALL", 5);
+            applySafeEnchants(sMeta, "unbreaking", 3, "sharpness", 5);
             
-            Enchantment lunge = Enchantment.getByName("LUNGE");
+            Enchantment lunge = getEnchantment("lunge");
             if (lunge != null) {
                 sMeta.addEnchant(lunge, 3, true);
             }
@@ -649,7 +662,7 @@ public class DefaultKitProvider {
         ItemStack maceWind = new ItemStack(Material.MACE);
         ItemMeta mMaceW = maceWind.getItemMeta();
         if (mMaceW != null) {
-            applySafeEnchants(mMaceW, "DENSITY", 5, "DURABILITY", 3, "MENDING", 1, "WIND_BURST", 3);
+            applySafeEnchants(mMaceW, "density", 5, "unbreaking", 3, "mending", 1, "wind_burst", 3);
             maceWind.setItemMeta(mMaceW);
         }
         items[1] = maceWind;
@@ -658,7 +671,7 @@ public class DefaultKitProvider {
         ItemStack maceBreach = new ItemStack(Material.MACE);
         ItemMeta mMaceB = maceBreach.getItemMeta();
         if (mMaceB != null) {
-            applySafeEnchants(mMaceB, "BREACH", 4, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(mMaceB, "breach", 4, "unbreaking", 3, "mending", 1);
             maceBreach.setItemMeta(mMaceB);
         }
         items[2] = maceBreach;
@@ -667,7 +680,7 @@ public class DefaultKitProvider {
         ItemStack sword = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta mSword = sword.getItemMeta();
         if (mSword != null) {
-            applySafeEnchants(mSword, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "KNOCKBACK", 1);
+            applySafeEnchants(mSword, "sharpness", 5, "unbreaking", 3, "mending", 1, "knockback", 1);
             sword.setItemMeta(mSword);
         }
         items[3] = sword;
@@ -676,7 +689,7 @@ public class DefaultKitProvider {
         ItemStack axe = new ItemStack(Material.NETHERITE_AXE);
         ItemMeta mAxe = axe.getItemMeta();
         if (mAxe != null) {
-            applySafeEnchants(mAxe, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "DIG_SPEED", 5);
+            applySafeEnchants(mAxe, "sharpness", 5, "unbreaking", 3, "mending", 1, "efficiency", 5);
             axe.setItemMeta(mAxe);
         }
         items[4] = axe;
@@ -698,7 +711,7 @@ public class DefaultKitProvider {
         ItemStack shield = new ItemStack(Material.SHIELD);
         ItemMeta mShield = shield.getItemMeta();
         if (mShield != null) {
-            applySafeEnchants(mShield, "DURABILITY", 2);
+            applySafeEnchants(mShield, "unbreaking", 2);
             shield.setItemMeta(mShield);
         }
         items[16] = shield;
@@ -713,10 +726,10 @@ public class DefaultKitProvider {
         }
         
         // Armor (Reusing helper from Mace kit)
-        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "PROTECTION_FALL", 4, "DEPTH_STRIDER", 3, "SOUL_SPEED", 3);
-        items[37] = createMaceArmor(Material.NETHERITE_LEGGINGS, "SWIFT_SNEAK", 3, null, 0, null, 0);
+        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed", 3);
+        items[37] = createMaceArmor(Material.NETHERITE_LEGGINGS, "swift_sneak", 3, null, 0, null, 0);
         items[38] = createMaceArmor(Material.NETHERITE_CHESTPLATE, null, 0, null, 0, null, 0);
-        items[39] = createMaceArmor(Material.NETHERITE_HELMET, "OXYGEN", 3, "WATER_WORKER", 1, null, 0);
+        items[39] = createMaceArmor(Material.NETHERITE_HELMET, "respiration", 3, "aqua_affinity", 1, null, 0);
         
         // Offhand: Totem
         items[40] = new ItemStack(Material.TOTEM_OF_UNDYING);
@@ -732,7 +745,7 @@ public class DefaultKitProvider {
         ItemStack sword = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta mSword = sword.getItemMeta();
         if (mSword != null) {
-            applySafeEnchants(mSword, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "KNOCKBACK", 1);
+            applySafeEnchants(mSword, "sharpness", 5, "unbreaking", 3, "mending", 1, "knockback", 1);
             sword.setItemMeta(mSword);
         }
         items[0] = sword;
@@ -741,7 +754,7 @@ public class DefaultKitProvider {
         ItemStack axe = new ItemStack(Material.NETHERITE_AXE);
         ItemMeta mAxe = axe.getItemMeta();
         if (mAxe != null) {
-            applySafeEnchants(mAxe, "DAMAGE_ALL", 5, "DURABILITY", 3, "MENDING", 1, "DIG_SPEED", 5);
+            applySafeEnchants(mAxe, "sharpness", 5, "unbreaking", 3, "mending", 1, "efficiency", 5);
             axe.setItemMeta(mAxe);
         }
         items[1] = axe;
@@ -750,7 +763,7 @@ public class DefaultKitProvider {
         ItemStack crossbow = new ItemStack(Material.CROSSBOW);
         ItemMeta mCross = crossbow.getItemMeta();
         if (mCross != null) {
-            applySafeEnchants(mCross, "QUICK_CHARGE", 3, "DURABILITY", 3, "PIERCING", 4);
+            applySafeEnchants(mCross, "quick_charge", 3, "unbreaking", 3, "piercing", 4);
             crossbow.setItemMeta(mCross);
         }
         items[2] = crossbow;
@@ -759,7 +772,7 @@ public class DefaultKitProvider {
         ItemStack flint = new ItemStack(Material.FLINT_AND_STEEL);
         ItemMeta mFlint = flint.getItemMeta();
         if (mFlint != null) {
-            applySafeEnchants(mFlint, "DURABILITY", 3, "MENDING", 1);
+            applySafeEnchants(mFlint, "unbreaking", 3, "mending", 1);
             flint.setItemMeta(mFlint);
         }
         items[3] = flint;
@@ -793,7 +806,7 @@ public class DefaultKitProvider {
         ItemStack bow = new ItemStack(Material.BOW);
         ItemMeta mBow = bow.getItemMeta();
         if (mBow != null) {
-            applySafeEnchants(mBow, "ARROW_KNOCKBACK", 2, "ARROW_DAMAGE", 5, "ARROW_FIRE", 1);
+            applySafeEnchants(mBow, "punch", 2, "power", 5, "flame", 1);
             bow.setItemMeta(mBow);
         }
         items[13] = bow;
@@ -807,13 +820,13 @@ public class DefaultKitProvider {
         }
 
         // Boots: Prot 4, Unb 3, Mend, FF 4, Depth 3, Soul Speed 3
-        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "PROTECTION_FALL", 4, "DEPTH_STRIDER", 3, "SOUL_SPEED", 3);
+        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed", 3);
         
         // Leggings: Blast Prot 4, Unb 3, Mend, Swift Sneak 3
         ItemStack legs = new ItemStack(Material.NETHERITE_LEGGINGS);
         ItemMeta mLegs = legs.getItemMeta();
         if (mLegs != null) {
-            applySafeEnchants(mLegs, "PROTECTION_EXPLOSIONS", 4, "DURABILITY", 3, "MENDING", 1, "SWIFT_SNEAK", 3);
+            applySafeEnchants(mLegs, "blast_protection", 4, "unbreaking", 3, "mending", 1, "swift_sneak", 3);
             legs.setItemMeta(mLegs);
         }
         items[37] = legs;
@@ -822,7 +835,7 @@ public class DefaultKitProvider {
         items[38] = createMaceArmor(Material.NETHERITE_CHESTPLATE, null, 0, null, 0, null, 0);
 
         // Helmet: Prot 4, Unb 3, Mend, Resp 3, Aqua
-        items[39] = createMaceArmor(Material.NETHERITE_HELMET, "OXYGEN", 3, "WATER_WORKER", 1, null, 0);
+        items[39] = createMaceArmor(Material.NETHERITE_HELMET, "respiration", 3, "aqua_affinity", 1, null, 0);
 
         // Offhand: Shield
         items[40] = new ItemStack(Material.SHIELD);
@@ -840,23 +853,7 @@ public class DefaultKitProvider {
             meta.setDisplayName(name);
         }
 
-        Enchantment target = null;
-        if (enchantType.equalsIgnoreCase("sharpness")) {
-            target = Enchantment.getByName("DAMAGE_ALL");
-            if (target == null) target = Enchantment.getByName("SHARP_WEAPON");
-        } else if (enchantType.equalsIgnoreCase("density")) {
-            target = Enchantment.getByName("DENSITY");
-        } else if (enchantType.equalsIgnoreCase("protection")) {
-            target = Enchantment.getByName("PROTECTION_ENVIRONMENTAL");
-        } else if (enchantType.equalsIgnoreCase("efficiency")) {
-            target = Enchantment.getByName("DIG_SPEED");
-        } else if (enchantType.equalsIgnoreCase("unbreaking")) {
-            target = Enchantment.getByName("DURABILITY");
-        } else if (enchantType.equalsIgnoreCase("power")) {
-            target = Enchantment.getByName("ARROW_DAMAGE");
-        } else if (enchantType.equalsIgnoreCase("piercing")) {
-            target = Enchantment.getByName("PIERCING");
-        }
+        Enchantment target = getEnchantment(enchantType);
 
         if (target != null) {
             meta.addEnchant(target, level, true);

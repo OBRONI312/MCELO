@@ -101,6 +101,17 @@ public class RankedCommand implements CommandExecutor, TabCompleter {
         plugin.getKitEditorManager().saveKit(player);
     }
 
+    private void handlePalette(Player player) {
+        UUID playerUUID = player.getUniqueId();
+        String editing = plugin.getKitEditorManager().getEditingKit(playerUUID);
+        if (editing != null) {
+            player.sendMessage("§cYou are already editing a kit!");
+            return;
+        }
+        player.sendMessage("§aOpening vanilla palette...");
+        plugin.getKitEditorManager().openVanillaPalette(player, 1);
+    }
+
     private void handleStats(Player player) {
         // Updated to use the correct UserManager getter
         PvPUser user = plugin.getUserManager().getUser(player.getUniqueId());

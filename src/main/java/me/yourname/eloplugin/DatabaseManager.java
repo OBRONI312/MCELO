@@ -25,22 +25,14 @@ public class DatabaseManager {
 
     private void connect() {
         try {
-            // Set the absolute path for the database as requested
-            String dbPath = "/home/obroni/MCELO/plugins/EloPractice/database.db";
-            File dbFile = new File(dbPath);
-            
-            // Fallback: If we cannot write to the hardcoded path (e.g. on Windows), use default folder
-            if (!dbFile.getParentFile().exists() && !dbFile.getParentFile().mkdirs()) {
-                plugin.getLogger().warning("Could not create directory for hardcoded path: " + dbPath);
-                plugin.getLogger().info("Falling back to default plugin folder storage.");
-                dbFile = new File(plugin.getDataFolder(), "database.db");
-                dbPath = dbFile.getAbsolutePath();
+            // Use plugin folder for database storage
+            File pluginFolder = plugin.getDataFolder();
+            if (!pluginFolder.exists()) {
+                pluginFolder.mkdirs();
             }
             
-            // Ensure the directory structure exists
-            if (dbFile.getParentFile() != null && !dbFile.getParentFile().exists()) {
-                dbFile.getParentFile().mkdirs();
-            }
+            File dbFile = new File(pluginFolder, "database.db");
+            String dbPath = dbFile.getAbsolutePath();
 
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);

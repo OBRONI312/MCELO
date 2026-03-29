@@ -6,3 +6,7 @@ commands:
   ranked:
     description: Main command for the Elo system.
     usage: /<command> [join|editkit|stats]
+  elo-admin:
+    description: Administrator commands for the Elo system.
+    usage: /<command> [verify|unverify|reset] <player>
+    permission: elopractice.admin

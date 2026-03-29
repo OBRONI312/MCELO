@@ -1,8 +1,0 @@
-name: EloPractice
-version: 1.0
-main: me.yourname.eloplugin.Main
-api-version: '1.21'
-commands:
-  ranked:
-    description: Main command for the Elo system.
-    usage: /<command> [join|editkit|stats]

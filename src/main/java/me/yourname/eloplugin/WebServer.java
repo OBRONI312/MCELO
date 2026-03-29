@@ -1,19 +1,17 @@
 package me.yourname.eloplugin;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
+import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.nio.file.Files;
 
 public class WebServer {
 
     private final Main plugin;
-    private HttpServer server;
+    private Undertow server;
     private final int port = 8081;
 
     public WebServer(Main plugin) {
@@ -22,9 +20,10 @@ public class WebServer {
 
     public void start() {
         try {
-            server = HttpServer.create(new InetSocketAddress(port), 0);
-            server.createContext("/", new FileHandler());
-            server.setExecutor(null); // Default executor
+            server = Undertow.builder()
+                .addHttpListener(port, "0.0.0.0")
+                .setHandler(new FileHandler())
+                .build();
             server.start();
             plugin.getLogger().info("Leaderboard Web Server started at http://localhost:" + port + "/");
 
@@ -32,37 +31,31 @@ public class WebServer {
             if (!new File(plugin.getDataFolder(), "index.html").exists()) {
                 plugin.getLogger().warning("⚠ index.html is missing! Please upload it to: " + plugin.getDataFolder().getAbsolutePath());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             plugin.getLogger().warning("Failed to start web server: " + e.getMessage());
         }
     }
 
     public void stop() {
         if (server != null) {
-            server.stop(0);
+            server.stop();
         }
     }
 
     private class FileHandler implements HttpHandler {
         @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String path = exchange.getRequestURI().getPath();
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String path = exchange.getRequestPath();
 
             // Redirect root to index.html
-            if (path.equals("/")) {
+            if (path.equals("/") || path.isEmpty()) {
                 path = "/index.html";
             }
 
             File file;
-            // Serve the database from the specific path defined in DatabaseManager
+            // Serve the database from plugin folder
             if (path.equals("/database.db")) {
-                file = new File("/home/obroni/MCELO/plugins/EloPractice/database.db");
-                // Fallback: If hardcoded path doesn't exist (e.g. local testing), check plugin folder
-                if (!file.exists()) {
-                    plugin.getLogger().warning("Database file missing at hardcoded path: " + file.getAbsolutePath());
-                    plugin.getLogger().info("Attempting to serve database.db from local plugin folder instead.");
-                    file = new File(plugin.getDataFolder(), "database.db");
-                }
+                file = new File(plugin.getDataFolder(), "database.db");
             } else {
                 // Serve other files (html, css, js) from the plugin folder
                 // Security: Basic check to prevent going up directories
@@ -73,18 +66,28 @@ public class WebServer {
             if (file.exists() && !file.isDirectory()) {
                 byte[] bytes = Files.readAllBytes(file.toPath());
                 
-                // Set headers
-                exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*"); // Allow external fetch
-                exchange.getResponseHeaders().set("Cache-Control", "no-cache, no-store, must-revalidate"); // Disable caching
-                if (path.endsWith(".html")) exchange.getResponseHeaders().set("Content-Type", "text/html");
-                else if (path.endsWith(".db")) exchange.getResponseHeaders().set("Content-Type", "application/octet-stream");
+                // Set CORS headers
+                exchange.getResponseHeaders().put(Headers.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+                
+                // Set content type
+                if (path.endsWith(".html")) {
+                    exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html; charset=utf-8");
+                } else if (path.endsWith(".db")) {
+                    exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream");
+                } else if (path.endsWith(".json")) {
+                    exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
+                } else if (path.endsWith(".css")) {
+                    exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/css");
+                } else if (path.endsWith(".js")) {
+                    exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/javascript");
+                }
 
-                exchange.sendResponseHeaders(200, bytes.length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(bytes);
-                os.close();
+                exchange.setStatusCode(200);
+                exchange.getResponseSender().send(bytes);
             } else {
-                exchange.sendResponseHeaders(404, -1);
+                exchange.setStatusCode(404);
+                exchange.getResponseSender().send("404 Not Found");
             }
         }
     }

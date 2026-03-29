@@ -224,8 +224,8 @@ public class KitListener implements Listener {
             if (ench.equals(Enchantment.PIERCING) && item.containsEnchantment(Enchantment.MULTISHOT)) return true;
         }
         if (mat == Material.BOW) {
-            if (ench.equals(Enchantment.ARROW_INFINITE) && item.containsEnchantment(Enchantment.MENDING)) return true;
-            if (ench.equals(Enchantment.MENDING) && item.containsEnchantment(Enchantment.ARROW_INFINITE)) return true;
+            if (ench.equals(Enchantment.INFINITY) && item.containsEnchantment(Enchantment.MENDING)) return true;
+            if (ench.equals(Enchantment.MENDING) && item.containsEnchantment(Enchantment.INFINITY)) return true;
         }
         if (mat == Material.TRIDENT) {
             if (ench.equals(Enchantment.RIPTIDE) && (item.containsEnchantment(Enchantment.LOYALTY) || item.containsEnchantment(Enchantment.CHANNELING))) return true;

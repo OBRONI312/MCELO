@@ -76,13 +76,17 @@ public class UserManager implements Listener {
 
         ItemStack queueItem = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta qMeta = queueItem.getItemMeta();
-        qMeta.setDisplayName("§bRanked Queue §7(Right Click)");
-        queueItem.setItemMeta(qMeta);
+        if (qMeta != null) {
+            qMeta.setDisplayName("§bRanked Queue §7(Right Click)");
+            queueItem.setItemMeta(qMeta);
+        }
 
         ItemStack editorItem = new ItemStack(Material.BOOK);
         ItemMeta eMeta = editorItem.getItemMeta();
-        eMeta.setDisplayName("§eKit Editor §7(Right Click)");
-        editorItem.setItemMeta(eMeta);
+        if (eMeta != null) {
+            eMeta.setDisplayName("§eKit Editor §7(Right Click)");
+            editorItem.setItemMeta(eMeta);
+        }
 
         player.getInventory().setItem(0, queueItem);
         player.getInventory().setItem(4, editorItem);

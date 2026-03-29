@@ -609,16 +609,15 @@ public class DefaultKitProvider {
     @SuppressWarnings("deprecation")
     private static void applySafeEnchants(ItemMeta meta, Object... params) {
         for (int i = 0; i < params.length; i += 2) {
-            String name = (String) params[i];
+            String name = ((Object) params[i]).toString().toLowerCase();
             int level = (int) params[i+1];
             
-            Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(name.toLowerCase()));
-            // Fallback for older legacy strings if namespaced key is null
-            if (ench == null) {
-                ench = Enchantment.getByName(name.toUpperCase());
-            }
+            // Map old legacy names to new namespacedkey names
+            String key = name.replace("_all", "").replace("infinity", "infinity");
+            
+            Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(key));
 
-            if (ench != null) {
+            if (ench != null && meta != null) {
                 meta.addEnchant(ench, level, true);
             }
         }

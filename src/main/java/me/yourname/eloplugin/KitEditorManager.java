@@ -159,8 +159,14 @@ public class KitEditorManager {
         if (item == null || item.getType() == Material.AIR) return;
         
         List<Enchantment> possible = new ArrayList<>();
-        for (Enchantment ench : Enchantment.values()) {
-            if (ench.canEnchantItem(item)) possible.add(ench);
+        // Fix for Paper 1.21: Use supported method to iterate enchantments
+        try {
+            for (Enchantment ench : Enchantment.values()) {
+                if (ench.canEnchantItem(item)) possible.add(ench);
+            }
+        } catch (Exception e) {
+            player.sendMessage("§cCould not load enchantments: " + e.getMessage());
+            return;
         }
 
         Inventory inv = Bukkit.createInventory(null, 54, "§8Enchant: " + item.getType().name() + " - Page " + page);

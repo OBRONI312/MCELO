@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RankedCommand implements CommandExecutor, TabCompleter {
@@ -24,7 +25,8 @@ public class RankedCommand implements CommandExecutor, TabCompleter {
 
     // FIXED: Added the correct 4 parameters (Sender, Command, Label, Args)
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+            @NotNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
@@ -104,11 +106,10 @@ public class RankedCommand implements CommandExecutor, TabCompleter {
     private void handlePalette(Player player) {
         UUID playerUUID = player.getUniqueId();
         String editing = plugin.getKitEditorManager().getEditingKit(playerUUID);
-        if (editing != null) {
-            player.sendMessage("§cYou are already editing a kit!");
+        if (editing == null || !editing.equals("vanilla")) {
+            player.sendMessage("§cThe palette is only available while editing the vanilla kit.");
             return;
         }
-        player.sendMessage("§aOpening vanilla palette...");
         plugin.getKitEditorManager().openVanillaPalette(player, 1);
     }
 
@@ -134,7 +135,8 @@ public class RankedCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
+            @NotNull String[] args) {
         if (args.length == 1) {
             List<String> cmds = new ArrayList<>(Arrays.asList("join", "editkit", "stats", "savekit", "palette"));
             return cmds.stream()

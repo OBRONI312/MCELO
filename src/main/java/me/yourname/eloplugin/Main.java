@@ -42,7 +42,14 @@ public class Main extends JavaPlugin {
             getCommand("elo-admin").setExecutor(adminCmd);
             getCommand("elo-admin").setTabCompleter(adminCmd);
         }
-        
+
+        // Register Custom Kit Command
+        CustomCommand customCmd = new CustomCommand(this);
+        if (getCommand("custom") != null) {
+            getCommand("custom").setExecutor(customCmd);
+            getCommand("custom").setTabCompleter(customCmd); // Assuming you might want tab completion later
+        }
+
         // Register Listener
         getServer().getPluginManager().registerEvents(new MatchListener(this), this);
         getServer().getPluginManager().registerEvents(new KitListener(this), this);
@@ -72,10 +79,27 @@ public class Main extends JavaPlugin {
     }
 
     // These "Getters" fix your undefined method errors!
-    public UserManager getUserManager() { return userManager; }
-    public MatchManager getMatchManager() { return matchManager; }
-    public QueueManager getQueueManager() { return queueManager; }
-    public KitEditorManager getKitEditorManager() { return kitEditorManager; }
-    public ArenaManager getArenaManager() { return arenaManager; }
-    public DatabaseManager getDatabaseManager() { return databaseManager; }
+    public UserManager getUserManager() {
+        return userManager;
+    }
+
+    public MatchManager getMatchManager() {
+        return matchManager;
+    }
+
+    public QueueManager getQueueManager() {
+        return queueManager;
+    }
+
+    public KitEditorManager getKitEditorManager() {
+        return kitEditorManager;
+    }
+
+    public ArenaManager getArenaManager() {
+        return arenaManager;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
 }

@@ -12,7 +12,7 @@ public class PvPUser {
     private int wins;
     private int losses;
     private boolean inMatch;
-    
+
     // Matchmaking Settings
     private boolean strictMatching;
     private int eloLimit;
@@ -25,21 +25,27 @@ public class PvPUser {
      */
     private final Map<String, ItemStack[]> kitLayouts = new HashMap<>();
 
+    // --- Custom Kit Storage (1-9) ---
+    private final Map<Integer, ItemStack[]> customKitLayouts = new HashMap<>();
+    private final Map<Integer, String> customKitMaps = new HashMap<>();
+
     public PvPUser(UUID uuid) {
         this.uuid = uuid;
         this.wins = 0;
         this.losses = 0;
         this.inMatch = false;
-        
+
         // Default competitive matchmaking constraints
         this.strictMatching = false;
-        this.eloLimit = 200; 
+        this.eloLimit = 200;
         this.verified = false;
     }
 
     // --- Stats Getters & Setters ---
 
-    public UUID getUuid() { return uuid; }
+    public UUID getUuid() {
+        return uuid;
+    }
 
     public int getElo(String kitName) {
         return elos.getOrDefault(kitName.toLowerCase(), 1000);
@@ -49,40 +55,66 @@ public class PvPUser {
         elos.put(kitName.toLowerCase(), elo);
     }
 
-    public Map<String, Integer> getElosMap() { return elos; }
+    public Map<String, Integer> getElosMap() {
+        return elos;
+    }
 
-    public int getWins() { return wins; }
+    public int getWins() {
+        return wins;
+    }
 
-    public void setWins(int wins) { this.wins = wins; }
+    public void setWins(int wins) {
+        this.wins = wins;
+    }
 
-    public void addWin() { this.wins++; }
+    public void addWin() {
+        this.wins++;
+    }
 
-    public int getLosses() { return losses; }
+    public int getLosses() {
+        return losses;
+    }
 
-    public void setLosses(int losses) { this.losses = losses; }
+    public void setLosses(int losses) {
+        this.losses = losses;
+    }
 
-    public void addLoss() { this.losses++; }
+    public void addLoss() {
+        this.losses++;
+    }
 
-    public boolean isInMatch() { return inMatch; }
+    public boolean isInMatch() {
+        return inMatch;
+    }
 
-    public void setInMatch(boolean inMatch) { this.inMatch = inMatch; }
+    public void setInMatch(boolean inMatch) {
+        this.inMatch = inMatch;
+    }
 
-    public boolean isVerified() { return verified; }
+    public boolean isVerified() {
+        return verified;
+    }
 
-    public void setVerified(boolean verified) { this.verified = verified; }
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
 
     // --- Matchmaking Settings ---
 
-    public boolean isStrictMatching() { return strictMatching; }
-
-    public void setStrictMatching(boolean strictMatching) { 
-        this.strictMatching = strictMatching; 
+    public boolean isStrictMatching() {
+        return strictMatching;
     }
 
-    public int getEloLimit() { return eloLimit; }
+    public void setStrictMatching(boolean strictMatching) {
+        this.strictMatching = strictMatching;
+    }
 
-    public void setEloLimit(int eloLimit) { 
-        this.eloLimit = eloLimit; 
+    public int getEloLimit() {
+        return eloLimit;
+    }
+
+    public void setEloLimit(int eloLimit) {
+        this.eloLimit = eloLimit;
     }
 
     // --- Inventory Management ---
@@ -104,7 +136,9 @@ public class PvPUser {
         return kitLayouts.get(kitName.toLowerCase());
     }
 
-    public Map<String, ItemStack[]> getKitLayoutsMap() { return kitLayouts; }
+    public Map<String, ItemStack[]> getKitLayoutsMap() {
+        return kitLayouts;
+    }
 
     public void removeKitLayout(String kitName) {
         kitLayouts.remove(kitName.toLowerCase());
@@ -115,8 +149,24 @@ public class PvPUser {
      * Called when the player closes the KitEditor or finishes a match.
      */
     public void saveKitLayout(String kitName, ItemStack[] items) {
-        // We clone the array to ensure the data is "snapshotted" 
+        // We clone the array to ensure the data is "snapshotted"
         // and not modified by external inventory changes.
         kitLayouts.put(kitName.toLowerCase(), items.clone());
+    }
+
+    public ItemStack[] getCustomKitLayout(int slot) {
+        return customKitLayouts.get(slot);
+    }
+
+    public void saveCustomKitLayout(int slot, ItemStack[] items) {
+        customKitLayouts.put(slot, items.clone());
+    }
+
+    public String getCustomKitMap(int slot) {
+        return customKitMaps.getOrDefault(slot, "vanilla");
+    }
+
+    public void setCustomKitMap(int slot, String kitMap) {
+        customKitMaps.put(slot, kitMap);
     }
 }

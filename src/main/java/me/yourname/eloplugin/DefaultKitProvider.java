@@ -3,37 +3,49 @@ package me.yourname.eloplugin;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
-import org.bukkit.block.ShulkerBox;
 
 public class DefaultKitProvider {
 
     public static ItemStack[] getDefaultKit(String kitName) {
         switch (kitName.toLowerCase()) {
-            case "vanilla": return getVanillaKit();
-            case "uhc": return getUHCKit();
-            case "pot": return getPotKit();
-            case "nethop": return getNethOPKit();
-            case "mace": return getMaceKit();
-            case "smp": return getSMPKit();
-            case "sword": return getSwordKit();
-            case "axe": return getAxeKit();
-            case "lifesteal": return getLifestealKit();
-            case "spear-mace": return getSpearMaceKit();
-            case "cartpvp": return getCartPvPKit();
-            default: return new ItemStack[41];
+            case "vanilla":
+                return getVanillaKit();
+            case "uhc":
+                return getUHCKit();
+            case "pot":
+                return getPotKit();
+            case "nethop":
+                return getNethOPKit();
+            case "mace":
+                return getMaceKit();
+            case "smp":
+                return getSMPKit();
+            case "sword":
+                return getSwordKit();
+            case "axe":
+                return getAxeKit();
+            case "lifesteal":
+                return getLifestealKit();
+            case "spear-mace":
+                return getSpearMaceKit();
+            case "cartpvp":
+                return getCartPvPKit();
+            default:
+                return new ItemStack[41];
         }
     }
 
     @SuppressWarnings("deprecation")
     private static ItemStack[] getVanillaKit() {
         ItemStack[] items = new ItemStack[41];
-        
+
         // --- Hotbar ---
         // 0: Netherite Sword (Sharp 5, Unb 3, Mend, KB 1)
         ItemStack sword = new ItemStack(Material.NETHERITE_SWORD);
@@ -111,7 +123,7 @@ public class DefaultKitProvider {
         items[16] = new ItemStack(Material.RESPAWN_ANCHOR, 64);
         items[17] = new ItemStack(Material.GLOWSTONE, 64);
         items[18] = new ItemStack(Material.SHIELD);
-        
+
         // Slow Falling Arrows (30s)
         ItemStack arrows = new ItemStack(Material.TIPPED_ARROW, 64);
         PotionMeta arrowMeta = (PotionMeta) arrows.getItemMeta();
@@ -131,7 +143,8 @@ public class DefaultKitProvider {
         ItemStack boots = new ItemStack(Material.NETHERITE_BOOTS);
         ItemMeta mBoots = boots.getItemMeta();
         if (mBoots != null) {
-            applySafeEnchants(mBoots, "blast_protection", 4, "unbreaking", 3, "mending", 1, "feather_falling", 4, "depth_strider", 3, "soul_speed", 3);
+            applySafeEnchants(mBoots, "blast_protection", 4, "unbreaking", 3, "mending", 1, "feather_falling", 4,
+                    "depth_strider", 3, "soul_speed", 3);
             boots.setItemMeta(mBoots);
         }
         items[36] = boots;
@@ -158,11 +171,12 @@ public class DefaultKitProvider {
         ItemStack helm = new ItemStack(Material.NETHERITE_HELMET);
         ItemMeta mHelm = helm.getItemMeta();
         if (mHelm != null) {
-            applySafeEnchants(mHelm, "protection", 4, "unbreaking", 3, "mending", 1, "respiration", 3, "aqua_affinity", 1);
+            applySafeEnchants(mHelm, "protection", 4, "unbreaking", 3, "mending", 1, "respiration", 3, "aqua_affinity",
+                    1);
             helm.setItemMeta(mHelm);
         }
         items[39] = helm;
-        
+
         // Offhand
         items[40] = new ItemStack(Material.TOTEM_OF_UNDYING);
 
@@ -176,7 +190,7 @@ public class DefaultKitProvider {
         items[1] = createItem(Material.DIAMOND_AXE, null, "sharpness", 1);
         items[2] = createItem(Material.BOW, null, "power", 1);
         items[3] = createItem(Material.CROSSBOW, null, "piercing", 1);
-        
+
         // Pick with Unbreaking
         ItemStack pick = createItem(Material.DIAMOND_PICKAXE, null, "efficiency", 3);
         ItemMeta pm = pick.getItemMeta();
@@ -194,7 +208,7 @@ public class DefaultKitProvider {
         // Inventory: Ammo & Food
         items[9] = new ItemStack(Material.ARROW, 64);
         items[10] = new ItemStack(Material.GOLDEN_APPLE, 7);
-        
+
         // Golden Heads (Renamed Player Heads)
         ItemStack gHead = new ItemStack(Material.PLAYER_HEAD, 2);
         ItemMeta gHeadMeta = gHead.getItemMeta();
@@ -203,7 +217,7 @@ public class DefaultKitProvider {
             gHead.setItemMeta(gHeadMeta);
         }
         items[11] = gHead;
-        
+
         items[12] = new ItemStack(Material.COBWEB, 8);
 
         // Extras
@@ -214,7 +228,7 @@ public class DefaultKitProvider {
         items[18] = new ItemStack(Material.COBBLESTONE, 64);
         items[19] = new ItemStack(Material.OAK_PLANKS, 64);
         items[20] = new ItemStack(Material.SHIELD); // Spare Shield
-        
+
         // Armor
         items[36] = createItem(Material.DIAMOND_BOOTS, null, "protection", 3);
         items[37] = createItem(Material.DIAMOND_LEGGINGS, null, "protection", 2); // Prot 2
@@ -226,7 +240,8 @@ public class DefaultKitProvider {
 
     @SuppressWarnings("deprecation")
     private static ItemStack[] getPotKit() {
-        // Pot: NethOP but diamond armor/sword, no enchanting bottles, steak, 4 str/speed
+        // Pot: NethOP but diamond armor/sword, no enchanting bottles, steak, 4
+        // str/speed
         ItemStack[] items = new ItemStack[41];
 
         // Diamond Sword (Sharp 5)
@@ -234,18 +249,21 @@ public class DefaultKitProvider {
         items[1] = new ItemStack(Material.ENDER_PEARL, 16);
 
         // Strength and Speed Potions
-        for (int i = 2; i < 6; i++) items[i] = createPotion(PotionType.STRONG_STRENGTH, true);
-        for (int i = 6; i < 10; i++) items[i] = createPotion(PotionType.STRONG_SWIFTNESS, true);
+        for (int i = 2; i < 6; i++)
+            items[i] = createPotion(PotionType.STRONG_STRENGTH, true);
+        for (int i = 6; i < 10; i++)
+            items[i] = createPotion(PotionType.STRONG_SWIFTNESS, true);
 
         // Fill with Instant Health II
-        for (int i = 10; i < 36; i++) items[i] = createPotion(PotionType.STRONG_HEALING, true);
+        for (int i = 10; i < 36; i++)
+            items[i] = createPotion(PotionType.STRONG_HEALING, true);
 
         // Steak in offhand
         items[40] = new ItemStack(Material.COOKED_BEEF, 64);
 
         // Diamond Armor (Prot 4)
         // Diamond Armor (Prot 4)
-        
+
         items[36] = createItem(Material.DIAMOND_BOOTS, "§bDiamond Boots", "protection", 4);
         items[37] = createItem(Material.DIAMOND_LEGGINGS, "§bDiamond Leggings", "protection", 4);
         items[38] = createItem(Material.DIAMOND_CHESTPLATE, "§bDiamond Chestplate", "protection", 4);
@@ -265,17 +283,20 @@ public class DefaultKitProvider {
             sword.setItemMeta(sMeta);
         }
         items[0] = sword;
-        
+
         items[1] = new ItemStack(Material.TOTEM_OF_UNDYING);
         items[2] = new ItemStack(Material.TOTEM_OF_UNDYING);
         items[3] = new ItemStack(Material.TOTEM_OF_UNDYING);
         items[4] = new ItemStack(Material.EXPERIENCE_BOTTLE, 64);
         items[5] = new ItemStack(Material.EXPERIENCE_BOTTLE, 64);
-        
-        for (int i = 6; i < 12; i++) items[i] = createPotion(PotionType.STRONG_STRENGTH, true);
-        for (int i = 12; i < 18; i++) items[i] = createPotion(PotionType.STRONG_SWIFTNESS, true);
-        for (int i = 18; i < 36; i++) items[i] = createPotion(PotionType.STRONG_HEALING, true);
-        
+
+        for (int i = 6; i < 12; i++)
+            items[i] = createPotion(PotionType.STRONG_STRENGTH, true);
+        for (int i = 12; i < 18; i++)
+            items[i] = createPotion(PotionType.STRONG_SWIFTNESS, true);
+        for (int i = 18; i < 36; i++)
+            items[i] = createPotion(PotionType.STRONG_HEALING, true);
+
         items[36] = createSMPArmor(Material.NETHERITE_BOOTS);
         items[37] = createSMPArmor(Material.NETHERITE_LEGGINGS);
         items[38] = createSMPArmor(Material.NETHERITE_CHESTPLATE);
@@ -287,7 +308,7 @@ public class DefaultKitProvider {
     @SuppressWarnings("deprecation")
     private static ItemStack[] getMaceKit() {
         ItemStack[] items = new ItemStack[41];
-        
+
         // --- Weapons ---
         // Mace 1: Breach 4, Unb 3, Mending
         ItemStack mace1 = new ItemStack(Material.MACE);
@@ -330,7 +351,7 @@ public class DefaultKitProvider {
         items[5] = new ItemStack(Material.ENDER_PEARL, 16);
         items[6] = createPotion(PotionType.STRONG_STRENGTH, true);
         items[7] = new ItemStack(Material.GOLDEN_APPLE, 64);
-        
+
         // Shield: Unbreaking 2
         ItemStack shield = new ItemStack(Material.SHIELD);
         ItemMeta mShield = shield.getItemMeta();
@@ -348,12 +369,14 @@ public class DefaultKitProvider {
             elytra.setItemMeta(dElytra);
         }
         items[9] = elytra;
-        
+
         items[10] = new ItemStack(Material.TOTEM_OF_UNDYING); // 2nd Totem
 
         // 3 more stacks of Wind Charges & Pearls
-        for (int i = 11; i < 14; i++) items[i] = new ItemStack(Material.WIND_CHARGE, 64);
-        for (int i = 14; i < 17; i++) items[i] = new ItemStack(Material.ENDER_PEARL, 16);
+        for (int i = 11; i < 14; i++)
+            items[i] = new ItemStack(Material.WIND_CHARGE, 64);
+        for (int i = 14; i < 17; i++)
+            items[i] = new ItemStack(Material.ENDER_PEARL, 16);
         items[17] = new ItemStack(Material.GOLDEN_APPLE, 64); // 2nd stack of GApples
 
         // Potions: 50% Str 2 (1:30) and 50% Speed 2 (1:30)
@@ -365,7 +388,8 @@ public class DefaultKitProvider {
 
         // --- Armor ---
         // Boots: Prot 4, Unb 3, Mend, FF 4, Depth 3, Soul Speed 3
-        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed", 3);
+        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed",
+                3);
         // Leggings: Prot 4, Unb 3, Mend, Swift Sneak 3
         items[37] = createMaceArmor(Material.NETHERITE_LEGGINGS, "swift_sneak", 3, null, 0, null, 0);
         // Chest: Prot 4, Unb 3, Mend
@@ -378,23 +402,27 @@ public class DefaultKitProvider {
     }
 
     @SuppressWarnings("deprecation")
-    private static ItemStack createMaceArmor(Material mat, String ench1, int lvl1, String ench2, int lvl2, String ench3, int lvl3) {
+    private static ItemStack createMaceArmor(Material mat, String ench1, int lvl1, String ench2, int lvl2, String ench3,
+            int lvl3) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             applySafeEnchants(meta, "protection", 4, "unbreaking", 3, "mending", 1);
-            
+
             if (ench1 != null) {
                 Enchantment e1 = getEnchantment(ench1);
-                if (e1 != null) meta.addEnchant(e1, lvl1, true);
+                if (e1 != null)
+                    meta.addEnchant(e1, lvl1, true);
             }
             if (ench2 != null) {
                 Enchantment e2 = getEnchantment(ench2);
-                if (e2 != null) meta.addEnchant(e2, lvl2, true);
+                if (e2 != null)
+                    meta.addEnchant(e2, lvl2, true);
             }
             if (ench3 != null) {
                 Enchantment e3 = getEnchantment(ench3);
-                if (e3 != null) meta.addEnchant(e3, lvl3, true);
+                if (e3 != null)
+                    meta.addEnchant(e3, lvl3, true);
             }
             item.setItemMeta(meta);
         }
@@ -432,7 +460,8 @@ public class DefaultKitProvider {
         items[2] = axe;
 
         // 4. Pearls (4 stacks), XP, and Hotbar Totem
-        for (int i = 3; i < 7; i++) items[i] = new ItemStack(Material.ENDER_PEARL, 16);
+        for (int i = 3; i < 7; i++)
+            items[i] = new ItemStack(Material.ENDER_PEARL, 16);
         items[7] = new ItemStack(Material.EXPERIENCE_BOTTLE, 64);
         items[8] = new ItemStack(Material.TOTEM_OF_UNDYING); // Hotbar Totem
         items[9] = new ItemStack(Material.EXPERIENCE_BOTTLE, 64);
@@ -440,7 +469,8 @@ public class DefaultKitProvider {
         items[16] = new ItemStack(Material.EXPERIENCE_BOTTLE, 64); // XP moved to inv
 
         // 5. Fire Res (8:00) x5
-        for (int i = 11; i < 16; i++) items[i] = createPotion(PotionType.LONG_FIRE_RESISTANCE, true);
+        for (int i = 11; i < 16; i++)
+            items[i] = createPotion(PotionType.LONG_FIRE_RESISTANCE, true);
 
         // 2 Stacks of Golden Apples
         items[17] = new ItemStack(Material.GOLDEN_APPLE, 64);
@@ -458,7 +488,7 @@ public class DefaultKitProvider {
         items[37] = createSMPArmor(Material.NETHERITE_LEGGINGS);
         items[38] = createSMPArmor(Material.NETHERITE_CHESTPLATE);
         items[39] = createSMPArmor(Material.NETHERITE_HELMET);
-        
+
         // Shield (Mending, Unbreaking 3) in Offhand
         ItemStack shield = new ItemStack(Material.SHIELD);
         ItemMeta sMeta = shield.getItemMeta();
@@ -485,7 +515,7 @@ public class DefaultKitProvider {
         ItemStack[] items = new ItemStack[41];
         items[0] = new ItemStack(Material.DIAMOND_SWORD);
         items[1] = new ItemStack(Material.STONE_SWORD);
-        
+
         items[36] = new ItemStack(Material.DIAMOND_BOOTS);
         items[37] = new ItemStack(Material.DIAMOND_LEGGINGS);
         items[38] = new ItemStack(Material.DIAMOND_CHESTPLATE);
@@ -500,7 +530,7 @@ public class DefaultKitProvider {
         items[2] = new ItemStack(Material.CROSSBOW);
         items[3] = new ItemStack(Material.BOW);
         items[8] = new ItemStack(Material.ARROW, 7);
-        
+
         items[36] = new ItemStack(Material.DIAMOND_BOOTS);
         items[37] = new ItemStack(Material.DIAMOND_LEGGINGS);
         items[38] = new ItemStack(Material.DIAMOND_CHESTPLATE);
@@ -512,7 +542,7 @@ public class DefaultKitProvider {
     @SuppressWarnings("deprecation")
     private static ItemStack[] getLifestealKit() {
         ItemStack[] items = new ItemStack[41];
-        
+
         // --- Hotbar & Weapons ---
         // 0: Diamond Sword (Sharp 5, Unb 3, Mend, Fire Aspect 2)
         ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
@@ -554,7 +584,8 @@ public class DefaultKitProvider {
         items[10] = new ItemStack(Material.EXPERIENCE_BOTTLE, 64);
 
         // 4x 8min Fire Res (Long Fire Res)
-        for (int i = 11; i < 15; i++) items[i] = createPotion(PotionType.LONG_FIRE_RESISTANCE, true);
+        for (int i = 11; i < 15; i++)
+            items[i] = createPotion(PotionType.LONG_FIRE_RESISTANCE, true);
 
         // Rest of inventory (15-35): 50% Strength II, 50% Speed II
         boolean str = true;
@@ -568,7 +599,8 @@ public class DefaultKitProvider {
         ItemStack boots = new ItemStack(Material.DIAMOND_BOOTS);
         ItemMeta mBoots = boots.getItemMeta();
         if (mBoots != null) {
-            applySafeEnchants(mBoots, "protection", 3, "unbreaking", 3, "mending", 1, "feather_falling", 4, "depth_strider", 3);
+            applySafeEnchants(mBoots, "protection", 3, "unbreaking", 3, "mending", 1, "feather_falling", 4,
+                    "depth_strider", 3);
             boots.setItemMeta(mBoots);
         }
         items[36] = boots;
@@ -602,14 +634,14 @@ public class DefaultKitProvider {
 
         // Offhand: Shield
         items[40] = new ItemStack(Material.SHIELD);
-        
+
         return items;
     }
 
     private static void applySafeEnchants(ItemMeta meta, Object... params) {
         for (int i = 0; i < params.length; i += 2) {
             String name = ((Object) params[i]).toString().toLowerCase();
-            int level = (int) params[i+1];
+            int level = (int) params[i + 1];
             Enchantment ench = getEnchantment(name);
 
             if (ench != null && meta != null) {
@@ -619,9 +651,10 @@ public class DefaultKitProvider {
     }
 
     private static Enchantment getEnchantment(String name) {
-        if (name == null) return null;
-        // Modern lookup using NamespacedKey
-        Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(name.toLowerCase()
+        if (name == null)
+            return null;
+
+        String keyString = name.toLowerCase()
                 .replace("protection_environmental", "protection")
                 .replace("damage_all", "sharpness")
                 .replace("dig_speed", "efficiency")
@@ -632,24 +665,27 @@ public class DefaultKitProvider {
                 .replace("arrow_damage", "power")
                 .replace("arrow_knockback", "punch")
                 .replace("arrow_fire", "flame")
-                .replace("arrow_infinite", "infinity")));
-        return ench;
+                .replace("arrow_infinite", "infinity");
+
+        // Modern Paper 1.21.1 lookup via Registry
+        return org.bukkit.Registry.ENCHANTMENT.get(NamespacedKey.minecraft(keyString));
     }
 
     private static ItemStack[] getSpearMaceKit() {
         ItemStack[] items = new ItemStack[41];
-        
+
         // --- Weapons ---
         // 0: Netherite Spear (Lunge 3, Unb 3, Sharp 5)
         Material spearMat = Material.matchMaterial("NETHERITE_SPEAR");
-        if (spearMat == null) spearMat = Material.TRIDENT;
-        
+        if (spearMat == null)
+            spearMat = Material.TRIDENT;
+
         ItemStack spear = new ItemStack(spearMat);
         ItemMeta sMeta = spear.getItemMeta();
         if (sMeta != null) {
             sMeta.setDisplayName("§3Netherite Spear");
             applySafeEnchants(sMeta, "unbreaking", 3, "sharpness", 5);
-            
+
             Enchantment lunge = getEnchantment("lunge");
             if (lunge != null) {
                 sMeta.addEnchant(lunge, 3, true);
@@ -657,7 +693,7 @@ public class DefaultKitProvider {
             spear.setItemMeta(sMeta);
         }
         items[0] = spear;
-        
+
         // 1: Mace (Density 5, Unb 3, Mend, Wind Burst 3)
         ItemStack maceWind = new ItemStack(Material.MACE);
         ItemMeta mMaceW = maceWind.getItemMeta();
@@ -666,7 +702,7 @@ public class DefaultKitProvider {
             maceWind.setItemMeta(mMaceW);
         }
         items[1] = maceWind;
-        
+
         // 2: Mace (Breach 4, Unb 3, Mend)
         ItemStack maceBreach = new ItemStack(Material.MACE);
         ItemMeta mMaceB = maceBreach.getItemMeta();
@@ -675,7 +711,7 @@ public class DefaultKitProvider {
             maceBreach.setItemMeta(mMaceB);
         }
         items[2] = maceBreach;
-        
+
         // 3: Netherite Sword (Sharp 5, Unb 3, Mend, KB 1)
         ItemStack sword = new ItemStack(Material.NETHERITE_SWORD);
         ItemMeta mSword = sword.getItemMeta();
@@ -684,7 +720,7 @@ public class DefaultKitProvider {
             sword.setItemMeta(mSword);
         }
         items[3] = sword;
-        
+
         // 4: Netherite Axe (Sharp 5, Unb 3, Mend, Eff 5)
         ItemStack axe = new ItemStack(Material.NETHERITE_AXE);
         ItemMeta mAxe = axe.getItemMeta();
@@ -693,20 +729,22 @@ public class DefaultKitProvider {
             axe.setItemMeta(mAxe);
         }
         items[4] = axe;
-        
+
         // --- Hotbar & Inventory Items ---
         items[5] = new ItemStack(Material.WIND_CHARGE, 64);
         items[6] = new ItemStack(Material.ENDER_PEARL, 16);
         items[7] = createPotion(PotionType.STRONG_STRENGTH, true);
         items[8] = new ItemStack(Material.GOLDEN_APPLE, 64);
-        
+
         // 9-11: 3 more stacks of Wind Charges
-        for (int i = 9; i < 12; i++) items[i] = new ItemStack(Material.WIND_CHARGE, 64);
+        for (int i = 9; i < 12; i++)
+            items[i] = new ItemStack(Material.WIND_CHARGE, 64);
         // 12-14: 3 more stacks of Pearls
-        for (int i = 12; i < 15; i++) items[i] = new ItemStack(Material.ENDER_PEARL, 16);
-        
+        for (int i = 12; i < 15; i++)
+            items[i] = new ItemStack(Material.ENDER_PEARL, 16);
+
         items[15] = new ItemStack(Material.GOLDEN_APPLE, 64); // 2nd stack GApples
-        
+
         // Shield: Unbreaking 2
         ItemStack shield = new ItemStack(Material.SHIELD);
         ItemMeta mShield = shield.getItemMeta();
@@ -715,25 +753,26 @@ public class DefaultKitProvider {
             shield.setItemMeta(mShield);
         }
         items[16] = shield;
-        
+
         items[17] = new ItemStack(Material.TOTEM_OF_UNDYING); // 2nd Totem
-        
+
         // Potions: 50% Str 2 (1:30) and 50% Speed 2 (1:30) (Splash)
         boolean str = true;
         for (int i = 18; i < 36; i++) {
             items[i] = createPotion(str ? PotionType.STRONG_STRENGTH : PotionType.STRONG_SWIFTNESS, true);
             str = !str;
         }
-        
+
         // Armor (Reusing helper from Mace kit)
-        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed", 3);
+        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed",
+                3);
         items[37] = createMaceArmor(Material.NETHERITE_LEGGINGS, "swift_sneak", 3, null, 0, null, 0);
         items[38] = createMaceArmor(Material.NETHERITE_CHESTPLATE, null, 0, null, 0, null, 0);
         items[39] = createMaceArmor(Material.NETHERITE_HELMET, "respiration", 3, "aqua_affinity", 1, null, 0);
-        
+
         // Offhand: Totem
         items[40] = new ItemStack(Material.TOTEM_OF_UNDYING);
-        
+
         return items;
     }
 
@@ -801,7 +840,7 @@ public class DefaultKitProvider {
         items[10] = new ItemStack(Material.OAK_LOG, 64); // 2nd stack
         items[11] = new ItemStack(Material.COBWEB, 64);
         items[12] = new ItemStack(Material.EXPERIENCE_BOTTLE, 64);
-        
+
         // Bow: Punch 2, Power 5, Flame
         ItemStack bow = new ItemStack(Material.BOW);
         ItemMeta mBow = bow.getItemMeta();
@@ -820,8 +859,9 @@ public class DefaultKitProvider {
         }
 
         // Boots: Prot 4, Unb 3, Mend, FF 4, Depth 3, Soul Speed 3
-        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed", 3);
-        
+        items[36] = createMaceArmor(Material.NETHERITE_BOOTS, "feather_falling", 4, "depth_strider", 3, "soul_speed",
+                3);
+
         // Leggings: Blast Prot 4, Unb 3, Mend, Swift Sneak 3
         ItemStack legs = new ItemStack(Material.NETHERITE_LEGGINGS);
         ItemMeta mLegs = legs.getItemMeta();
@@ -847,7 +887,8 @@ public class DefaultKitProvider {
     private static ItemStack createItem(Material mat, String name, String enchantType, int level) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return item;
+        if (meta == null)
+            return item;
 
         if (name != null) {
             meta.setDisplayName(name);
@@ -858,12 +899,12 @@ public class DefaultKitProvider {
         if (target != null) {
             meta.addEnchant(target, level, true);
         }
-        
+
         item.setItemMeta(meta);
         return item;
     }
 
-    private static ItemStack createPotion(PotionType type, boolean splash) {
+    public static ItemStack createPotion(PotionType type, boolean splash) {
         ItemStack pot = new ItemStack(splash ? Material.SPLASH_POTION : Material.POTION);
         PotionMeta meta = (PotionMeta) pot.getItemMeta();
         if (meta != null) {
@@ -871,5 +912,27 @@ public class DefaultKitProvider {
             pot.setItemMeta(meta);
         }
         return pot;
+    }
+
+    public static ItemStack createNamedItem(Material mat, String name) {
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(name);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    public static ItemStack createShulker(Material color, ItemStack content) {
+        ItemStack shulker = new ItemStack(color);
+        BlockStateMeta bsm = (BlockStateMeta) shulker.getItemMeta();
+        ShulkerBox box = (ShulkerBox) bsm.getBlockState();
+        for (int i = 0; i < 27; i++)
+            box.getInventory().setItem(i, content);
+        bsm.setBlockState(box);
+        bsm.setDisplayName("§fShulker of " + content.getType().name());
+        shulker.setItemMeta(bsm);
+        return shulker;
     }
 }

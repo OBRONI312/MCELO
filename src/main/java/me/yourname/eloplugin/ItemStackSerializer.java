@@ -15,13 +15,13 @@ public class ItemStackSerializer {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
-            
+
             dataOutput.writeInt(items.length);
-            
+
             for (ItemStack item : items) {
                 dataOutput.writeObject(item);
             }
-            
+
             dataOutput.close();
             return Base64.getEncoder().encodeToString(outputStream.toByteArray());
         } catch (Exception e) {
@@ -34,19 +34,19 @@ public class ItemStackSerializer {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(data));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-            
+
             int length = dataInput.readInt();
             ItemStack[] items = new ItemStack[length];
-            
+
             for (int i = 0; i < length; i++) {
                 items[i] = (ItemStack) dataInput.readObject();
             }
-            
+
             dataInput.close();
             return items;
         } catch (Exception e) {
-            e.printStackTrace();
-            return new ItemStack[0];
+            // Return default size to prevent ArrayIndexOutOfBounds elsewhere
+            return new ItemStack[41];
         }
     }
 }

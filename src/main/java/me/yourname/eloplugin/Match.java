@@ -25,7 +25,8 @@ public class Match {
         Player p1 = Bukkit.getPlayer(player1);
         Player p2 = Bukkit.getPlayer(player2);
 
-        if (p1 == null || p2 == null) return false;
+        if (p1 == null || p2 == null)
+            return false;
 
         // FIXED: Using getUserManager() instead of undefined getUser()
         PvPUser u1 = plugin.getUserManager().getUser(player1);
@@ -41,8 +42,15 @@ public class Match {
         preparePlayer(p2, u2);
 
         // --- Arena Generation & Teleportation ---
-        this.arenaInstance = plugin.getArenaManager().pasteArena(kitName);
-        
+        String arenaStyle = kitName;
+        if (kitName.startsWith("custom_")) {
+            try {
+                int slot = Integer.parseInt(kitName.split("_")[1]);
+                arenaStyle = u1.getCustomKitMap(slot);
+            } catch (Exception ignored) {}
+        }
+        this.arenaInstance = plugin.getArenaManager().pasteArena(arenaStyle);
+
         if (this.arenaInstance != null && this.arenaInstance.getSpawnPoints().size() >= 2) {
             // Index 0: Red Concrete (P1), Index 1: Blue Concrete (P2)
             Location loc1 = this.arenaInstance.getSpawnPoints().get(0);
@@ -58,9 +66,11 @@ public class Match {
             p2.teleport(loc2);
         } else if (this.arenaInstance != null) {
             // Fallback if no Netherite blocks found: center offset
-            // We just use the first spawn point or world coords if empty, calculated manually here as fallback
+            // We just use the first spawn point or world coords if empty, calculated
+            // manually here as fallback
             p1.sendMessage("§cWarning: Spawn points not configured in schematic (use Netherite Blocks).");
-            // (Simple fallback omitted to keep code clean, usually indicates schematic error)
+            // (Simple fallback omitted to keep code clean, usually indicates schematic
+            // error)
         } else {
             p1.sendMessage("§cError: Arena schematic not found. Match cancelled.");
             p2.sendMessage("§cError: Arena schematic not found. Match cancelled.");
@@ -69,18 +79,26 @@ public class Match {
 
         p1.sendMessage("§aMatch started against " + p2.getName() + " §7(Kit: " + kitName + ")");
         p2.sendMessage("§aMatch started against " + p1.getName() + " §7(Kit: " + kitName + ")");
-        
+
         return true;
     }
 
     private void preparePlayer(Player player, PvPUser user) {
         player.getInventory().clear();
-        
-        // Load the custom layout or the 1.21.11 default
-        ItemStack[] sourceLayout = user.getKitLayout(kitName);
-        ItemStack[] finalLayout;
-        ItemStack[] defaultLayout = plugin.getKitEditorManager().getServerDefault(kitName);
 
+        ItemStack[] finalLayout;
+        ItemStack[] defaultLayout;
+        ItemStack[] sourceLayout;
+
+        if (kitName.startsWith("custom_")) {
+            int slot = Integer.parseInt(kitName.split("_")[1]);
+            sourceLayout = user.getCustomKitLayout(slot);
+            String mapType = user.getCustomKitMap(slot);
+            defaultLayout = plugin.getKitEditorManager().getServerDefault(mapType);
+        } else {
+            sourceLayout = user.getKitLayout(kitName);
+            defaultLayout = plugin.getKitEditorManager().getServerDefault(kitName);
+        }
         if (sourceLayout == null) {
             finalLayout = defaultLayout;
         } else {
@@ -115,7 +133,7 @@ public class Match {
 
         winner.setInMatch(false);
         loser.setInMatch(false);
-        
+
         winner.addWin();
         loser.addLoss();
 
@@ -135,7 +153,7 @@ public class Match {
 
         // Teleport back to Spawn
         Location spawn = Bukkit.getWorlds().get(0).getSpawnLocation();
-        
+
         Player winnerPlayer = Bukkit.getPlayer(winnerUuid);
         if (winnerPlayer != null) {
             if (!winnerPlayer.isDead()) {
@@ -144,7 +162,7 @@ public class Match {
             }
             winnerPlayer.sendMessage("§6§lVICTORY! §e" + newWinnerElo + " §a(+" + (newWinnerElo - oldWinnerElo) + ")");
         }
-        
+
         Player loserPlayer = Bukkit.getPlayer(loserUuid);
         if (loserPlayer != null) {
             if (!loserPlayer.isDead()) {

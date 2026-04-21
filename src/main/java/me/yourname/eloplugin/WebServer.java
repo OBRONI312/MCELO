@@ -4,8 +4,10 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 
 public class WebServer {
@@ -67,7 +69,7 @@ public class WebServer {
                 byte[] bytes = Files.readAllBytes(file.toPath());
                 
                 // Set CORS headers
-                exchange.getResponseHeaders().put(Headers.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+                exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Origin"), "*");
                 exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
                 
                 // Set content type
@@ -84,7 +86,7 @@ public class WebServer {
                 }
 
                 exchange.setStatusCode(200);
-                exchange.getResponseSender().send(bytes);
+                exchange.getResponseSender().send(ByteBuffer.wrap(bytes));
             } else {
                 exchange.setStatusCode(404);
                 exchange.getResponseSender().send("404 Not Found");

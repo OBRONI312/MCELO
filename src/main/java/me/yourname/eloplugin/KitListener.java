@@ -2,8 +2,8 @@ package me.yourname.eloplugin;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,13 +34,35 @@ public class KitListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player))
+            return;
         Player player = (Player) event.getWhoClicked();
 
-        if (plugin.getKitEditorManager().getEditingKit(player.getUniqueId()) == null) return;
+        String title = event.getView().getTitle();
+        if (title.equals("§8Select Custom Kit Slot")) { // First title check
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null)
+                return;
+            int slot = event.getSlot() + 1;
+            plugin.getKitEditorManager().openMapSelector(player, slot);
+            return;
+        }
+        if (title.startsWith("§8Select Arena Type for Slot #")) {
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null || !event.getCurrentItem().hasItemMeta())
+                return;
+            int slot = Integer.parseInt(title.replaceAll("[^0-9]", ""));
+            String arenaType = event.getCurrentItem().getItemMeta().getDisplayName().replace("§b", "")
+                    .replace(" Arena", "").toLowerCase();
+            plugin.getUserManager().getUser(player.getUniqueId()).setCustomKitMap(slot, arenaType);
+            plugin.getKitEditorManager().openEditor(player, "custom_" + slot, false);
+            return;
+        }
+
+        if (plugin.getKitEditorManager().getEditingKit(player.getUniqueId()) == null)
+            return; // Only proceed if editing a kit
 
         // Handle GUI interactions
-        String title = event.getView().getTitle();
         if (title.startsWith("§8Vanilla Palette")) {
             event.setCancelled(true);
             handlePaletteClick(player, event.getCurrentItem(), title);
@@ -53,10 +75,10 @@ public class KitListener implements Listener {
         }
 
         // Prevent dropping via inventory UI
-        if (event.getAction() == InventoryAction.DROP_ALL_CURSOR || 
-            event.getAction() == InventoryAction.DROP_ALL_SLOT || 
-            event.getAction() == InventoryAction.DROP_ONE_CURSOR || 
-            event.getAction() == InventoryAction.DROP_ONE_SLOT) {
+        if (event.getAction() == InventoryAction.DROP_ALL_CURSOR ||
+                event.getAction() == InventoryAction.DROP_ALL_SLOT ||
+                event.getAction() == InventoryAction.DROP_ONE_CURSOR ||
+                event.getAction() == InventoryAction.DROP_ONE_SLOT) {
             event.setCancelled(true);
         }
 
@@ -130,7 +152,8 @@ public class KitListener implements Listener {
                     if (!player.hasCooldown(Material.PLAYER_HEAD)) {
                         item.setAmount(item.getAmount() - 1);
                         player.removePotionEffect(PotionEffectType.REGENERATION);
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1)); // Regen 2 for 10s
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 1)); // Regen 2 for
+                                                                                                         // 10s
                         player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2400, 0)); // Abs 1 for 2m
                         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 1f, 1f);
                         player.setCooldown(Material.PLAYER_HEAD, 20);
@@ -141,7 +164,8 @@ public class KitListener implements Listener {
     }
 
     private void handlePaletteClick(Player player, ItemStack clicked, String title) {
-        if (clicked == null) return;
+        if (clicked == null)
+            return;
         if (clicked.getType() == Material.ARROW) {
             int page = title.contains("Page 1") ? 2 : 1;
             plugin.getKitEditorManager().openVanillaPalette(player, page);
@@ -152,18 +176,23 @@ public class KitListener implements Listener {
     }
 
     private void handleEnchantClick(Player player, ItemStack clicked, boolean isRightClick, String title) {
-        if (clicked == null) return;
+        if (clicked == null)
+            return;
 
         // Handle Pagination for Enchantments
         if (clicked.getType() == Material.LIME_STAINED_GLASS_PANE) {
             int page = 1;
             try {
                 String[] parts = title.split(" - Page ");
-                if (parts.length > 1) page = Integer.parseInt(parts[1]);
-            } catch (Exception ignored) {}
+                if (parts.length > 1)
+                    page = Integer.parseInt(parts[1]);
+            } catch (Exception ignored) {
+            }
 
-            if (clicked.getItemMeta().getDisplayName().contains("Next")) page++;
-            else if (page > 1) page--;
+            if (clicked.getItemMeta().getDisplayName().contains("Next"))
+                page++;
+            else if (page > 1)
+                page--;
 
             int slot = plugin.getKitEditorManager().getEnchantingSlot().getOrDefault(player.getUniqueId(), -1);
             ItemStack item = player.getInventory().getItem(slot);
@@ -171,24 +200,30 @@ public class KitListener implements Listener {
             return;
         }
 
-        if (clicked.getType() != Material.ENCHANTED_BOOK) return;
-        
+        if (clicked.getType() != Material.ENCHANTED_BOOK)
+            return;
+
         int slot = plugin.getKitEditorManager().getEnchantingSlot().getOrDefault(player.getUniqueId(), -1);
-        if (slot == -1) return;
+        if (slot == -1)
+            return;
 
         ItemStack item = player.getInventory().getItem(slot);
-        if (item == null) return;
+        if (item == null)
+            return;
 
         EnchantmentStorageMeta meta = (EnchantmentStorageMeta) clicked.getItemMeta();
-        if (meta == null || meta.getStoredEnchants().isEmpty()) return;
+        if (meta == null || meta.getStoredEnchants().isEmpty())
+            return;
 
         Enchantment ench = meta.getStoredEnchants().keySet().iterator().next();
-        
-        int page = 1; 
-        try { 
+
+        int page = 1;
+        try {
             String[] parts = title.split(" - Page ");
-            if (parts.length > 1) page = Integer.parseInt(parts[1].trim());
-        } catch (Exception ignored) {}
+            if (parts.length > 1)
+                page = Integer.parseInt(parts[1].trim());
+        } catch (Exception ignored) {
+        }
 
         if (isRightClick) {
             item.removeEnchantment(ench);
@@ -197,12 +232,13 @@ public class KitListener implements Listener {
             // Check conflicts
             for (Enchantment existing : item.getEnchantments().keySet()) {
                 if (ench.conflictsWith(existing) && !ench.equals(existing)) {
-                    player.sendMessage("§cConflict: " + ench.getKey().getKey() + " conflicts with " + existing.getKey().getKey());
+                    player.sendMessage(
+                            "§cConflict: " + ench.getKey().getKey() + " conflicts with " + existing.getKey().getKey());
                     player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
                     return;
                 }
             }
-            
+
             // Handle Survival Logic: Multishot vs Piercing, Infinity vs Mending
             if (isVanillaConflict(item.getType(), ench, item)) {
                 player.sendMessage("§cThese enchantments are incompatible in Vanilla Minecraft.");
@@ -213,23 +249,37 @@ public class KitListener implements Listener {
             item.addUnsafeEnchantment(ench, ench.getMaxLevel());
             player.sendMessage("§aApplied " + ench.getKey().getKey());
         }
-        
+
         player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1f, 1f);
         plugin.getKitEditorManager().openEnchantEditor(player, item, page);
     }
 
     private boolean isVanillaConflict(Material mat, Enchantment ench, ItemStack item) {
         if (mat == Material.CROSSBOW) {
-            if (ench.equals(Enchantment.MULTISHOT) && item.containsEnchantment(Enchantment.PIERCING)) return true;
-            if (ench.equals(Enchantment.PIERCING) && item.containsEnchantment(Enchantment.MULTISHOT)) return true;
+            if (ench.equals(org.bukkit.enchantments.Enchantment.MULTISHOT)
+                    && item.containsEnchantment(org.bukkit.enchantments.Enchantment.PIERCING))
+                return true;
+            if (ench.equals(org.bukkit.enchantments.Enchantment.PIERCING)
+                    && item.containsEnchantment(org.bukkit.enchantments.Enchantment.MULTISHOT))
+                return true;
         }
         if (mat == Material.BOW) {
-            if (ench.equals(Enchantment.INFINITY) && item.containsEnchantment(Enchantment.MENDING)) return true;
-            if (ench.equals(Enchantment.MENDING) && item.containsEnchantment(Enchantment.INFINITY)) return true;
+            if (ench.equals(org.bukkit.enchantments.Enchantment.INFINITY)
+                    && item.containsEnchantment(org.bukkit.enchantments.Enchantment.MENDING))
+                return true;
+            if (ench.equals(org.bukkit.enchantments.Enchantment.MENDING)
+                    && item.containsEnchantment(org.bukkit.enchantments.Enchantment.INFINITY))
+                return true;
         }
         if (mat == Material.TRIDENT) {
-            if (ench.equals(Enchantment.RIPTIDE) && (item.containsEnchantment(Enchantment.LOYALTY) || item.containsEnchantment(Enchantment.CHANNELING))) return true;
-            if ((ench.equals(Enchantment.LOYALTY) || ench.equals(Enchantment.CHANNELING)) && item.containsEnchantment(Enchantment.RIPTIDE)) return true;
+            if (ench.equals(org.bukkit.enchantments.Enchantment.RIPTIDE)
+                    && (item.containsEnchantment(org.bukkit.enchantments.Enchantment.LOYALTY)
+                            || item.containsEnchantment(org.bukkit.enchantments.Enchantment.CHANNELING)))
+                return true;
+            if ((ench.equals(org.bukkit.enchantments.Enchantment.LOYALTY)
+                    || ench.equals(org.bukkit.enchantments.Enchantment.CHANNELING))
+                    && item.containsEnchantment(org.bukkit.enchantments.Enchantment.RIPTIDE))
+                return true;
         }
         // Bukkit's conflictsWith covers Protection types, Sharpness types, etc.
         return false;

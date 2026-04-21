@@ -30,7 +30,7 @@ public class DatabaseManager {
             if (!pluginFolder.exists()) {
                 pluginFolder.mkdirs();
             }
-            
+
             File dbFile = new File(pluginFolder, "database.db");
             String dbPath = dbFile.getAbsolutePath();
 
@@ -40,7 +40,7 @@ public class DatabaseManager {
             updateSchema(); // Ensure new columns exist
             plugin.getLogger().info("Connected to database at " + dbPath);
         } catch (SQLException | ClassNotFoundException e) {
-            plugin.getLogger().severe("Could not connect to database! Path: /home/obroni/MCELO/plugins/EloPractice/database.db");
+            plugin.getLogger().severe("Could not connect to database! Path: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -59,16 +59,23 @@ public class DatabaseManager {
                     "losses INTEGER DEFAULT 0, " +
                     "elo_data TEXT, " +
                     "verified BOOLEAN DEFAULT 0," +
-                    "kit_layouts TEXT)");
+                    "kit_layouts TEXT," +
+                    "custom_maps TEXT)");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     private void updateSchema() {
-        // Attempt to add kit_layouts column if it doesn't exist (for existing databases)
+        // Attempt to add kit_layouts column if it doesn't exist (for existing
+        // databases)
         try (Statement statement = connection.createStatement()) {
             statement.execute("ALTER TABLE player_stats ADD COLUMN kit_layouts TEXT");
+        } catch (SQLException e) {
+            // Column likely already exists, ignore
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("ALTER TABLE player_stats ADD COLUMN custom_maps TEXT");
         } catch (SQLException e) {
             // Column likely already exists, ignore
         }
@@ -88,8 +95,23 @@ public class DatabaseManager {
             layoutBuilder.append(entry.getKey()).append("::").append(base64).append("||");
         }
 
-        String sql = "INSERT OR REPLACE INTO player_stats (uuid, username, wins, losses, elo_data, verified, kit_layouts) VALUES(?, ?, ?, ?, ?, ?, ?)";
-        
+        // Serialize Custom Kit Layouts (1-9)
+        for (int i = 1; i <= 9; i++) {
+            ItemStack[] layout = user.getCustomKitLayout(i);
+            if (layout != null) {
+                String base64 = ItemStackSerializer.toBase64(layout);
+                layoutBuilder.append("custom_").append(i).append("::").append(base64).append("||");
+            }
+        }
+
+        // Serialize Custom Map Selections
+        StringBuilder mapBuilder = new StringBuilder();
+        for (int i = 1; i <= 9; i++) {
+            mapBuilder.append(i).append(":").append(user.getCustomKitMap(i)).append(",");
+        }
+
+        String sql = "INSERT OR REPLACE INTO player_stats (uuid, username, wins, losses, elo_data, verified, kit_layouts, custom_maps) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getUuid().toString());
             ps.setString(2, Bukkit.getOfflinePlayer(user.getUuid()).getName());
@@ -98,11 +120,13 @@ public class DatabaseManager {
             ps.setString(5, eloBuilder.toString());
             ps.setBoolean(6, user.isVerified());
             ps.setString(7, layoutBuilder.toString());
+            ps.setString(8, mapBuilder.toString());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     public void loadUser(PvPUser user) {
         String sql = "SELECT * FROM player_stats WHERE uuid=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -112,7 +136,7 @@ public class DatabaseManager {
                 user.setWins(rs.getInt("wins"));
                 user.setLosses(rs.getInt("losses"));
                 user.setVerified(rs.getBoolean("verified"));
-                
+
                 String eloData = rs.getString("elo_data");
                 if (eloData != null && !eloData.isEmpty()) {
                     for (String part : eloData.split(",")) {
@@ -120,7 +144,8 @@ public class DatabaseManager {
                         if (pair.length == 2) {
                             try {
                                 user.setElo(pair[0], Integer.parseInt(pair[1]));
-                            } catch (NumberFormatException ignored) {}
+                            } catch (NumberFormatException ignored) {
+                            }
                         }
                     }
                 }
@@ -130,7 +155,28 @@ public class DatabaseManager {
                     for (String part : layoutData.split("\\|\\|")) {
                         String[] pair = part.split("::");
                         if (pair.length == 2) {
-                            user.saveKitLayout(pair[0], ItemStackSerializer.fromBase64(pair[1]));
+                            if (pair[0].startsWith("custom_")) {
+                                try {
+                                    int slot = Integer.parseInt(pair[0].split("_")[1]);
+                                    user.saveCustomKitLayout(slot, ItemStackSerializer.fromBase64(pair[1]));
+                                } catch (Exception ignored) {
+                                }
+                            } else {
+                                user.saveKitLayout(pair[0], ItemStackSerializer.fromBase64(pair[1]));
+                            }
+                        }
+                    }
+                }
+
+                String mapData = rs.getString("custom_maps");
+                if (mapData != null && !mapData.isEmpty()) {
+                    for (String part : mapData.split(",")) {
+                        String[] pair = part.split(":");
+                        if (pair.length == 2) {
+                            try {
+                                user.setCustomKitMap(Integer.parseInt(pair[0]), pair[1]);
+                            } catch (Exception ignored) {
+                            }
                         }
                     }
                 }

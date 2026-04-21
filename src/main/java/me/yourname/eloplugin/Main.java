@@ -66,6 +66,9 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (databaseManager != null) {
+            databaseManager.close();
+        }
         if (webServer != null) {
             webServer.stop();
         }

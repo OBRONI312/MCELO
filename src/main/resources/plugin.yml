@@ -1,21 +1,11 @@
 name: EloPractice
-version: ${project.version}
+version: 1.0.0
 main: me.yourname.eloplugin.Main
 api-version: '1.21'
 depend: [WorldEdit]
 softdepend: [PlaceholderAPI]
 commands:
   ranked:
-    description: Main command for ranked practice.
-    usage: /ranked <join|editkit|savekit|stats|palette>
+    description: Main ranked command
   elo-admin:
-    description: Administrator commands for EloPractice.
-    usage: /elo-admin <verify|unverify|reset>
-    permission: elopractice.admin
-  custom:
-    description: Commands for custom kits.
-    usage: /custom <edit|duel|duelaccept|fight|randomque>
-permissions:
-  elopractice.admin:
-    description: Allows access to admin commands.
-    default: op
+    description: Admin commands for Elo

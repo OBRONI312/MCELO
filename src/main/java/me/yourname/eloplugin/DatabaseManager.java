@@ -34,12 +34,11 @@ public class DatabaseManager {
             File dbFile = new File(pluginFolder, "database.db");
             String dbPath = dbFile.getAbsolutePath();
 
-            Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
             createTable();
             updateSchema(); // Ensure new columns exist
             plugin.getLogger().info("Connected to database at " + dbPath);
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             plugin.getLogger().severe("Could not connect to database! Path: " + e.getMessage());
             e.printStackTrace();
         }
@@ -77,25 +76,28 @@ public class DatabaseManager {
     }
 
     private void updateSchema() {
-        // Attempt to add kit_layouts column if it doesn't exist (for existing
-        // databases)
-        try (Statement statement = connection.createStatement()) {
-            statement.execute("ALTER TABLE player_stats ADD COLUMN kit_layouts TEXT");
+        addColumnIfNotExists("kit_layouts", "TEXT");
+        addColumnIfNotExists("custom_maps", "TEXT");
+    }
+
+    private void addColumnIfNotExists(String columnName, String type) {
+        try (ResultSet rs = connection.getMetaData().getColumns(null, null, "player_stats", columnName)) {
+            if (!rs.next()) {
+                try (Statement statement = connection.createStatement()) {
+                    statement.execute("ALTER TABLE player_stats ADD COLUMN " + columnName + " " + type);
+                    plugin.getLogger().info("Added missing column '" + columnName + "' to player_stats table.");
+                }
+            }
         } catch (SQLException e) {
-            // Column likely already exists, ignore
-        }
-        try (Statement statement = connection.createStatement()) {
-            statement.execute("ALTER TABLE player_stats ADD COLUMN custom_maps TEXT");
-        } catch (SQLException e) {
-            // Column likely already exists, ignore
+            plugin.getLogger().warning("Failed to check or add column '" + columnName + "': " + e.getMessage());
         }
     }
 
     public void saveUser(PvPUser user) {
         // Serialize the Map<String, Integer> of elo
         StringBuilder eloBuilder = new StringBuilder();
-        for (String kit : plugin.getKitEditorManager().getValidKits()) {
-            eloBuilder.append(kit).append(":").append(user.getElo(kit)).append(",");
+        for (Map.Entry<String, Integer> entry : user.getElosMap().entrySet()) {
+            eloBuilder.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
         }
 
         // Serialize Kit Layouts

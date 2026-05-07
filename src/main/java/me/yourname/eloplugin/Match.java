@@ -13,6 +13,7 @@ public class Match {
     private final UUID player2;
     private final String kitName;
     private ArenaManager.ArenaInstance arenaInstance;
+    private boolean ending = false;
 
     public Match(Main plugin, UUID player1, UUID player2, String kitName) {
         this.plugin = plugin;
@@ -47,7 +48,8 @@ public class Match {
             try {
                 int slot = Integer.parseInt(kitName.split("_")[1]);
                 arenaStyle = u1.getCustomKitMap(slot);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         this.arenaInstance = plugin.getArenaManager().pasteArena(arenaStyle);
 
@@ -127,6 +129,10 @@ public class Match {
     }
 
     public void end(UUID winnerUuid) {
+        if (ending)
+            return;
+        ending = true;
+
         PvPUser winner = plugin.getUserManager().getUser(winnerUuid);
         UUID loserUuid = (winnerUuid.equals(player1)) ? player2 : player1;
         PvPUser loser = plugin.getUserManager().getUser(loserUuid);
@@ -151,33 +157,37 @@ public class Match {
             plugin.getDatabaseManager().saveUser(loser);
         });
 
-        // Teleport back to Spawn
-        Location spawn = Bukkit.getWorlds().get(0).getSpawnLocation();
-
         Player winnerPlayer = Bukkit.getPlayer(winnerUuid);
         if (winnerPlayer != null) {
-            if (!winnerPlayer.isDead()) {
-                restoreInventory(winnerPlayer, winner);
-                winnerPlayer.teleport(spawn);
-            }
             winnerPlayer.sendMessage("§6§lVICTORY! §e" + newWinnerElo + " §a(+" + (newWinnerElo - oldWinnerElo) + ")");
         }
 
         Player loserPlayer = Bukkit.getPlayer(loserUuid);
         if (loserPlayer != null) {
-            if (!loserPlayer.isDead()) {
-                restoreInventory(loserPlayer, loser);
-                loserPlayer.teleport(spawn);
-            }
             loserPlayer.sendMessage("§c§lDEFEAT! §e" + newLoserElo + " §c(" + (newLoserElo - oldLoserElo) + ")");
         }
 
-        // Cleanup Arena
-        if (this.arenaInstance != null) {
-            this.arenaInstance.remove();
-        }
+        // Wait 3 seconds before teleporting and cleaning up
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Location spawn = Bukkit.getWorlds().get(0).getSpawnLocation();
 
-        plugin.getMatchManager().removeMatch(this);
+            Player wp = Bukkit.getPlayer(winnerUuid);
+            if (wp != null && !wp.isDead()) {
+                restoreInventory(wp, winner);
+                wp.teleport(spawn);
+            }
+
+            Player lp = Bukkit.getPlayer(loserUuid);
+            if (lp != null && !lp.isDead()) {
+                restoreInventory(lp, loser);
+                lp.teleport(spawn);
+            }
+
+            if (this.arenaInstance != null) {
+                this.arenaInstance.remove();
+            }
+            plugin.getMatchManager().removeMatch(this);
+        }, 60L); // 60 ticks = 3 seconds
     }
 
     private void restoreInventory(Player player, PvPUser user) {

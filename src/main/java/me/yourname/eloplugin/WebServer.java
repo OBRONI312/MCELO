@@ -14,24 +14,26 @@ public class WebServer {
 
     private final Main plugin;
     private Undertow server;
-    private final int port = 8081;
+    private final int port;
 
-    public WebServer(Main plugin) {
+    public WebServer(Main plugin, int port) {
         this.plugin = plugin;
+        this.port = port;
     }
 
     public void start() {
         try {
             server = Undertow.builder()
-                .addHttpListener(port, "0.0.0.0")
-                .setHandler(new FileHandler())
-                .build();
+                    .addHttpListener(port, "0.0.0.0")
+                    .setHandler(new FileHandler())
+                    .build();
             server.start();
             plugin.getLogger().info("Leaderboard Web Server started at http://localhost:" + port + "/");
 
             // Check if the HTML file exists and warn if missing
             if (!new File(plugin.getDataFolder(), "index.html").exists()) {
-                plugin.getLogger().warning("⚠ index.html is missing! Please upload it to: " + plugin.getDataFolder().getAbsolutePath());
+                plugin.getLogger().warning(
+                        "⚠ index.html is missing! Please upload it to: " + plugin.getDataFolder().getAbsolutePath());
             }
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to start web server: " + e.getMessage());
@@ -55,28 +57,25 @@ public class WebServer {
             }
 
             File file;
-            // Serve the database from plugin folder
-            if (path.equals("/database.db")) {
-                file = new File(plugin.getDataFolder(), "database.db");
-            } else {
-                // Serve other files (html, css, js) from the plugin folder
-                // Security: Basic check to prevent going up directories
-                if (path.contains("..")) path = "/index.html";
-                file = new File(plugin.getDataFolder(), path);
+            // Security: Prevent access to sensitive files like database.db or config.yml
+            if (path.endsWith(".db") || path.endsWith(".yml") || path.contains("..")) {
+                exchange.setStatusCode(403);
+                exchange.getResponseSender().send("403 Forbidden");
+                return;
             }
+
+            file = new File(plugin.getDataFolder(), path);
 
             if (file.exists() && !file.isDirectory()) {
                 byte[] bytes = Files.readAllBytes(file.toPath());
-                
+
                 // Set CORS headers
                 exchange.getResponseHeaders().put(new HttpString("Access-Control-Allow-Origin"), "*");
                 exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
-                
+
                 // Set content type
                 if (path.endsWith(".html")) {
                     exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html; charset=utf-8");
-                } else if (path.endsWith(".db")) {
-                    exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream");
                 } else if (path.endsWith(".json")) {
                     exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
                 } else if (path.endsWith(".css")) {

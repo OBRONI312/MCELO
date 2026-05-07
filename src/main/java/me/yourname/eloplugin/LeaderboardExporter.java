@@ -25,7 +25,8 @@ public class LeaderboardExporter extends BukkitRunnable {
 
     private void export() {
         Connection conn = plugin.getDatabaseManager().getConnection();
-        if (conn == null) return;
+        if (conn == null)
+            return;
 
         Map<String, PlayerData> dataMap = new HashMap<>();
 
@@ -41,7 +42,10 @@ public class LeaderboardExporter extends BukkitRunnable {
                     pd.verified = rs.getBoolean("verified");
                     pd.wins = rs.getInt("wins");
                     pd.losses = rs.getInt("losses");
-                    
+
+                    if (pd.wins + pd.losses == 0)
+                        continue;
+
                     // Parse Elo Data
                     String eloData = rs.getString("elo_data");
                     int totalElo = 0;
@@ -56,7 +60,8 @@ public class LeaderboardExporter extends BukkitRunnable {
                                     pd.kits.put(pair[0], elo);
                                     totalElo += elo;
                                     kitCount++;
-                                } catch (NumberFormatException ignored) {}
+                                } catch (NumberFormatException ignored) {
+                                }
                             }
                         }
                     }
@@ -74,7 +79,8 @@ public class LeaderboardExporter extends BukkitRunnable {
             json.append("[");
             int i = 0;
             for (PlayerData pd : dataMap.values()) {
-                if (i > 0) json.append(",");
+                if (i > 0)
+                    json.append(",");
                 json.append("{");
                 json.append("\"uuid\":\"").append(pd.uuid).append("\",");
                 json.append("\"username\":\"").append(pd.username).append("\",");
@@ -82,16 +88,17 @@ public class LeaderboardExporter extends BukkitRunnable {
                 json.append("\"wins\":").append(pd.wins).append(",");
                 json.append("\"losses\":").append(pd.losses).append(",");
                 json.append("\"overall\":").append(pd.overall).append(",");
-                
+
                 json.append("\"kits\":{");
                 int k = 0;
                 for (Map.Entry<String, Integer> kit : pd.kits.entrySet()) {
-                    if (k > 0) json.append(",");
+                    if (k > 0)
+                        json.append(",");
                     json.append("\"").append(kit.getKey()).append("\":").append(kit.getValue());
                     k++;
                 }
                 json.append("}");
-                
+
                 json.append("}");
                 i++;
             }

@@ -1,0 +1,5 @@
+# MCELO Configuration
+
+prefix: "&6[EloPractice] &r"
+
+web-server-port: 8081

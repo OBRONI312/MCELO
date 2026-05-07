@@ -22,11 +22,12 @@ public class Main extends JavaPlugin {
         this.userManager = new UserManager(this);
         this.matchManager = new MatchManager();
         this.queueManager = new QueueManager(this);
-        this.kitEditorManager = new KitEditorManager(this);
         this.arenaManager = new ArenaManager(this);
+        this.kitEditorManager = new KitEditorManager(this);
 
         // Start Web Server for Leaderboard
-        this.webServer = new WebServer(this);
+        int webPort = getConfig().getInt("web-server-port", 8081);
+        this.webServer = new WebServer(this, webPort);
         this.webServer.start();
 
         // Register Command
@@ -76,7 +77,8 @@ public class Main extends JavaPlugin {
 
     private void loadConfig() {
         // Sets default values and saves config.yml if missing
-        getConfig().addDefault("prefix", "&6[EloPractice] ");
+        getConfig().addDefault("prefix", "&6[EloPractice] &r");
+        getConfig().addDefault("web-server-port", 8081);
         getConfig().options().copyDefaults(true);
         saveConfig();
     }

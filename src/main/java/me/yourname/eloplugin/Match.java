@@ -73,6 +73,7 @@ public class Match {
             p1.sendMessage("§cWarning: Spawn points not configured in schematic (use Netherite Blocks).");
             // (Simple fallback omitted to keep code clean, usually indicates schematic
             // error)
+            return false;
         } else {
             p1.sendMessage("§cError: Arena schematic not found. Match cancelled.");
             p2.sendMessage("§cError: Arena schematic not found. Match cancelled.");
@@ -158,12 +159,12 @@ public class Match {
         });
 
         Player winnerPlayer = Bukkit.getPlayer(winnerUuid);
-        if (winnerPlayer != null) {
+        if (winnerPlayer != null && winnerPlayer.isOnline()) {
             winnerPlayer.sendMessage("§6§lVICTORY! §e" + newWinnerElo + " §a(+" + (newWinnerElo - oldWinnerElo) + ")");
         }
 
         Player loserPlayer = Bukkit.getPlayer(loserUuid);
-        if (loserPlayer != null) {
+        if (loserPlayer != null && loserPlayer.isOnline()) {
             loserPlayer.sendMessage("§c§lDEFEAT! §e" + newLoserElo + " §c(" + (newLoserElo - oldLoserElo) + ")");
         }
 

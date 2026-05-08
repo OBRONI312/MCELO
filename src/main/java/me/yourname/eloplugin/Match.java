@@ -2,6 +2,8 @@ package me.yourname.eloplugin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import java.util.UUID;
@@ -73,10 +75,14 @@ public class Match {
             p1.sendMessage("§cWarning: Spawn points not configured in schematic (use Netherite Blocks).");
             // (Simple fallback omitted to keep code clean, usually indicates schematic
             // error)
+            u1.setInMatch(false);
+            u2.setInMatch(false);
             return false;
         } else {
             p1.sendMessage("§cError: Arena schematic not found. Match cancelled.");
             p2.sendMessage("§cError: Arena schematic not found. Match cancelled.");
+            u1.setInMatch(false);
+            u2.setInMatch(false);
             return false;
         }
 
@@ -88,6 +94,10 @@ public class Match {
 
     private void preparePlayer(Player player, PvPUser user) {
         player.getInventory().clear();
+        // Clear active effects and fire to ensure a fair start
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+        player.setFireTicks(0);
+        player.setSaturation(20.0f);
 
         ItemStack[] finalLayout;
         ItemStack[] defaultLayout;
@@ -105,8 +115,11 @@ public class Match {
         if (sourceLayout == null) {
             finalLayout = defaultLayout;
         } else {
-            // Copy the player's layout so we can patch gaps
-            finalLayout = sourceLayout.clone();
+            // Copy the player's layout into a standard 41-slot array (36 main + 4 armor + 1
+            // offhand)
+            finalLayout = new ItemStack[41];
+            System.arraycopy(sourceLayout, 0, finalLayout, 0, Math.min(sourceLayout.length, 41));
+
             // PATCH: If player's saved kit is missing armor (null), use default armor
             for (int i = 36; i <= 40; i++) {
                 if (i < defaultLayout.length && finalLayout[i] == null && defaultLayout[i] != null) {
@@ -125,7 +138,10 @@ public class Match {
             }
         }
 
-        player.setHealth(20.0);
+        AttributeInstance maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        if (maxHealth != null) {
+            player.setHealth(maxHealth.getValue());
+        }
         player.setFoodLevel(20);
     }
 

@@ -1,104 +1,68 @@
 package me.yourname.eloplugin;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.bukkit.Bukkit;
+import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.*;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.bukkit.inventory.ItemStack;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DatabaseManager {
 
     private final Main plugin;
-    private Connection connection;
+    private final File dataFile;
+    private final Map<UUID, UserRecord> cache = new ConcurrentHashMap<>();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public DatabaseManager(Main plugin) {
         this.plugin = plugin;
-        connect();
+        this.dataFile = new File(plugin.getDataFolder(), "players.json");
+        
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+        }
+        
+        loadAll();
     }
 
-    private void connect() {
-        try {
-            // Use plugin folder for database storage
-            File pluginFolder = plugin.getDataFolder();
-            if (!pluginFolder.exists()) {
-                pluginFolder.mkdirs();
+    private void loadAll() {
+        if (!dataFile.exists()) return;
+        try (Reader reader = new FileReader(dataFile)) {
+            Type type = new TypeToken<Map<UUID, UserRecord>>() {}.getType();
+            Map<UUID, UserRecord> loaded = gson.fromJson(reader, type);
+            if (loaded != null) {
+                cache.putAll(loaded);
             }
+        } catch (IOException e) {
+            plugin.getLogger().severe("Could not load players.json: " + e.getMessage());
+        }
+    }
 
-            File dbFile = new File(pluginFolder, "database.db");
-            String dbPath = dbFile.getAbsolutePath();
-
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
-            createTable();
-            updateSchema(); // Ensure new columns exist
-            plugin.getLogger().info("Connected to database at " + dbPath);
-        } catch (SQLException e) {
-            plugin.getLogger().severe("Could not connect to database! Path: " + e.getMessage());
-            e.printStackTrace();
+    public synchronized void saveAll() {
+        try (Writer writer = new FileWriter(dataFile)) {
+            gson.toJson(cache, writer);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Could not save players.json: " + e.getMessage());
         }
     }
 
     public void close() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    private void createTable() {
-        try (Statement statement = connection.createStatement()) {
-            // Create table if it doesn't exist
-            statement.execute("CREATE TABLE IF NOT EXISTS player_stats (" +
-                    "uuid TEXT PRIMARY KEY, " +
-                    "username TEXT, " +
-                    "wins INTEGER DEFAULT 0, " +
-                    "losses INTEGER DEFAULT 0, " +
-                    "elo_data TEXT, " +
-                    "verified BOOLEAN DEFAULT 0," +
-                    "kit_layouts TEXT," +
-                    "custom_maps TEXT)");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateSchema() {
-        addColumnIfNotExists("kit_layouts", "TEXT");
-        addColumnIfNotExists("custom_maps", "TEXT");
-    }
-
-    private void addColumnIfNotExists(String columnName, String type) {
-        try (ResultSet rs = connection.getMetaData().getColumns(null, null, "player_stats", columnName)) {
-            if (!rs.next()) {
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("ALTER TABLE player_stats ADD COLUMN " + columnName + " " + type);
-                    plugin.getLogger().info("Added missing column '" + columnName + "' to player_stats table.");
-                }
-            }
-        } catch (SQLException e) {
-            plugin.getLogger().warning("Failed to check or add column '" + columnName + "': " + e.getMessage());
-        }
+        saveAll();
     }
 
     public void saveUser(PvPUser user) {
-        // Serialize the Map<String, Integer> of elo
-        StringBuilder eloBuilder = new StringBuilder();
-        for (Map.Entry<String, Integer> entry : user.getElosMap().entrySet()) {
-            eloBuilder.append(entry.getKey()).append(":").append(entry.getValue()).append(",");
-        }
+        UserRecord record = new UserRecord();
+        record.username = Bukkit.getOfflinePlayer(user.getUuid()).getName();
+        record.wins = user.getWins();
+        record.losses = user.getLosses();
+        record.elos = new HashMap<>(user.getElosMap());
+        record.verified = user.isVerified();
 
         // Serialize Kit Layouts
         StringBuilder layoutBuilder = new StringBuilder();
@@ -106,8 +70,6 @@ public class DatabaseManager {
             String base64 = ItemStackSerializer.toBase64(entry.getValue());
             layoutBuilder.append(entry.getKey()).append("::").append(base64).append("||");
         }
-
-        // Serialize Custom Kit Layouts (1-9)
         for (int i = 1; i <= 9; i++) {
             ItemStack[] layout = user.getCustomKitLayout(i);
             if (layout != null) {
@@ -115,96 +77,83 @@ public class DatabaseManager {
                 layoutBuilder.append("custom_").append(i).append("::").append(base64).append("||");
             }
         }
+        record.kitLayouts = layoutBuilder.toString();
 
-        // Serialize Custom Map Selections
+        // Serialize Maps
         StringBuilder mapBuilder = new StringBuilder();
         for (int i = 1; i <= 9; i++) {
             mapBuilder.append(i).append(":").append(user.getCustomKitMap(i)).append(",");
         }
+        record.customMaps = mapBuilder.toString();
 
-        String sql = "INSERT OR REPLACE INTO player_stats (uuid, username, wins, losses, elo_data, verified, kit_layouts, custom_maps) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, user.getUuid().toString());
-            ps.setString(2, Bukkit.getOfflinePlayer(user.getUuid()).getName());
-            ps.setInt(3, user.getWins());
-            ps.setInt(4, user.getLosses());
-            ps.setString(5, eloBuilder.toString());
-            ps.setBoolean(6, user.isVerified());
-            ps.setString(7, layoutBuilder.toString());
-            ps.setString(8, mapBuilder.toString());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        cache.put(user.getUuid(), record);
+        saveAll();
     }
 
     public void loadUser(PvPUser user) {
-        String sql = "SELECT * FROM player_stats WHERE uuid=?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, user.getUuid().toString());
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                user.setWins(rs.getInt("wins"));
-                user.setLosses(rs.getInt("losses"));
-                user.setVerified(rs.getBoolean("verified"));
-
-                String eloData = rs.getString("elo_data");
-                if (eloData != null && !eloData.isEmpty()) {
-                    for (String part : eloData.split(",")) {
-                        String[] pair = part.split(":");
-                        if (pair.length == 2) {
-                            try {
-                                user.setElo(pair[0], Integer.parseInt(pair[1]));
-                            } catch (NumberFormatException ignored) {
-                            }
-                        }
-                    }
+        UserRecord record = cache.get(user.getUuid());
+        if (record != null) {
+            user.setWins(record.wins);
+            user.setLosses(record.losses);
+            user.setVerified(record.verified);
+            if (record.elos != null) {
+                for (Map.Entry<String, Integer> entry : record.elos.entrySet()) {
+                    user.setElo(entry.getKey(), entry.getValue());
                 }
+            }
 
-                String layoutData = rs.getString("kit_layouts");
-                if (layoutData != null && !layoutData.isEmpty()) {
-                    for (String part : layoutData.split("\\|\\|")) {
-                        String[] pair = part.split("::");
-                        if (pair.length == 2) {
-                            if (pair[0].startsWith("custom_")) {
-                                try {
-                                    int slot = Integer.parseInt(pair[0].split("_")[1]);
-                                    user.saveCustomKitLayout(slot, ItemStackSerializer.fromBase64(pair[1]));
-                                } catch (Exception ignored) {
-                                }
-                            } else {
-                                user.saveKitLayout(pair[0], ItemStackSerializer.fromBase64(pair[1]));
-                            }
-                        }
-                    }
-                }
-
-                String mapData = rs.getString("custom_maps");
-                if (mapData != null && !mapData.isEmpty()) {
-                    for (String part : mapData.split(",")) {
-                        String[] pair = part.split(":");
-                        if (pair.length == 2) {
+            if (record.kitLayouts != null && !record.kitLayouts.isEmpty()) {
+                for (String part : record.kitLayouts.split("\\|\\|")) {
+                    String[] pair = part.split("::");
+                    if (pair.length == 2) {
+                        if (pair[0].startsWith("custom_")) {
                             try {
-                                user.setCustomKitMap(Integer.parseInt(pair[0]), pair[1]);
-                            } catch (Exception ignored) {
-                            }
+                                int slot = Integer.parseInt(pair[0].split("_")[1]);
+                                user.saveCustomKitLayout(slot, ItemStackSerializer.fromBase64(pair[1]));
+                            } catch (Exception ignored) {}
+                        } else {
+                            user.saveKitLayout(pair[0], ItemStackSerializer.fromBase64(pair[1]));
                         }
                     }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            if (record.customMaps != null && !record.customMaps.isEmpty()) {
+                for (String part : record.customMaps.split(",")) {
+                    String[] pair = part.split(":");
+                    if (pair.length == 2) {
+                        try {
+                            user.setCustomKitMap(Integer.parseInt(pair[0]), pair[1]);
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
         }
     }
 
     public void deleteUser(UUID uuid) {
-        String sql = "DELETE FROM player_stats WHERE uuid=?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        cache.remove(uuid);
+        saveAll();
+    }
+
+    // This method is kept for compatibility with LeaderboardExporter but doesn't return a Connection anymore
+    // We will update LeaderboardExporter to not use it.
+    @Deprecated
+    public Object getConnection() {
+        return null;
+    }
+
+    public Map<UUID, UserRecord> getCache() {
+        return cache;
+    }
+
+    public static class UserRecord {
+        public String username;
+        public int wins;
+        public int losses;
+        public Map<String, Integer> elos;
+        public boolean verified;
+        public String kitLayouts;
+        public String customMaps;
     }
 }

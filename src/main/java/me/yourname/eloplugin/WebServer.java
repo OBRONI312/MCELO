@@ -57,8 +57,8 @@ public class WebServer {
             }
 
             File file;
-            // Security: Prevent access to sensitive files like database.db or config.yml
-            if (path.endsWith(".db") || path.endsWith(".yml") || path.contains("..")) {
+            // Security: Prevent access to sensitive files like config.yml
+            if (path.endsWith(".yml") || path.contains("..")) {
                 exchange.setStatusCode(403);
                 exchange.getResponseSender().send("403 Forbidden");
                 return;

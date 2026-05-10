@@ -114,14 +114,16 @@ public class RankedCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleStats(Player player) {
-        // Updated to use the correct UserManager getter
         PvPUser user = plugin.getUserManager().getUser(player.getUniqueId());
         player.sendMessage("§6§lYOUR STATS");
         player.sendMessage("§eWins: §f" + user.getWins());
         player.sendMessage("§eLosses: §f" + user.getLosses());
         player.sendMessage("§6§lKit Ratings:");
         for (String kit : validKits) {
-            player.sendMessage(" §7- §e" + kit + ": §f" + user.getElo(kit));
+            int matches = user.getKitMatches(kit);
+            int elo = user.getElo(kit);
+            String status = matches >= 3 ? "§f" + elo : "§7Unranked (" + matches + "/3)";
+            player.sendMessage(" §7- §e" + kit + ": " + status);
         }
     }
 

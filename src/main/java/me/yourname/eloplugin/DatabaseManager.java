@@ -34,19 +34,41 @@ public class DatabaseManager {
     private void loadAll() {
         if (!dataFile.exists()) return;
         try (Reader reader = new FileReader(dataFile)) {
-            Type type = new TypeToken<Map<UUID, UserRecord>>() {}.getType();
-            Map<UUID, UserRecord> loaded = gson.fromJson(reader, type);
+            // Using Map<String, UserRecord> to ensure Gson handles JSON keys correctly
+            Type type = new TypeToken<Map<String, UserRecord>>() {}.getType();
+            Map<String, UserRecord> loaded = gson.fromJson(reader, type);
             if (loaded != null) {
-                cache.putAll(loaded);
+                cache.clear();
+                for (Map.Entry<String, UserRecord> entry : loaded.entrySet()) {
+                    try {
+                        cache.put(UUID.fromString(entry.getKey()), entry.getValue());
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("Skipping invalid UUID in players.json: " + entry.getKey());
+                    }
+                }
+                plugin.getLogger().info("Loaded " + cache.size() + " players from players.json");
             }
-        } catch (IOException e) {
-            plugin.getLogger().severe("Could not load players.json: " + e.getMessage());
+        } catch (Exception e) {
+            plugin.getLogger().severe("CRITICAL: Could not load players.json: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public synchronized void saveAll() {
+        // Safety check: Don't overwrite if cache is empty but file had data
+        // (Unless the file was already basically empty)
+        if (cache.isEmpty() && dataFile.exists() && dataFile.length() > 5) {
+            plugin.getLogger().warning("Safety: Skipping saveAll because cache is empty but players.json has data. Possible load failure.");
+            return;
+        }
+
         try (Writer writer = new FileWriter(dataFile)) {
-            gson.toJson(cache, writer);
+            // Convert to Map<String, UserRecord> for clean JSON output
+            Map<String, UserRecord> toSave = new HashMap<>();
+            for (Map.Entry<UUID, UserRecord> entry : cache.entrySet()) {
+                toSave.put(entry.getKey().toString(), entry.getValue());
+            }
+            gson.toJson(toSave, writer);
         } catch (IOException e) {
             plugin.getLogger().severe("Could not save players.json: " + e.getMessage());
         }
@@ -62,6 +84,7 @@ public class DatabaseManager {
         record.wins = user.getWins();
         record.losses = user.getLosses();
         record.elos = new HashMap<>(user.getElosMap());
+        record.kitMatches = new HashMap<>(user.getKitMatchesMap());
         record.verified = user.isVerified();
 
         // Serialize Kit Layouts
@@ -99,6 +122,11 @@ public class DatabaseManager {
             if (record.elos != null) {
                 for (Map.Entry<String, Integer> entry : record.elos.entrySet()) {
                     user.setElo(entry.getKey(), entry.getValue());
+                }
+            }
+            if (record.kitMatches != null) {
+                for (Map.Entry<String, Integer> entry : record.kitMatches.entrySet()) {
+                    user.setKitMatches(entry.getKey(), entry.getValue());
                 }
             }
 
@@ -152,6 +180,7 @@ public class DatabaseManager {
         public int wins;
         public int losses;
         public Map<String, Integer> elos;
+        public Map<String, Integer> kitMatches;
         public boolean verified;
         public String kitLayouts;
         public String customMaps;

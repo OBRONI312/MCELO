@@ -159,6 +159,9 @@ public class Match {
 
         winner.addWin();
         loser.addLoss();
+        
+        winner.incrementKitMatches(kitName);
+        loser.incrementKitMatches(kitName);
 
         // Calculate Elo change using the EloCalculator
         int oldWinnerElo = winner.getElo(kitName);

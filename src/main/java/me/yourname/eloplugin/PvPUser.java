@@ -9,6 +9,7 @@ public class PvPUser {
 
     private final UUID uuid;
     private final Map<String, Integer> elos = new HashMap<>();
+    private final Map<String, Integer> kitMatches = new HashMap<>();
     private int wins;
     private int losses;
     private boolean inMatch;
@@ -57,6 +58,22 @@ public class PvPUser {
 
     public Map<String, Integer> getElosMap() {
         return elos;
+    }
+
+    public int getKitMatches(String kitName) {
+        return kitMatches.getOrDefault(kitName.toLowerCase(), 0);
+    }
+
+    public void incrementKitMatches(String kitName) {
+        kitMatches.put(kitName.toLowerCase(), getKitMatches(kitName) + 1);
+    }
+
+    public void setKitMatches(String kitName, int matches) {
+        kitMatches.put(kitName.toLowerCase(), matches);
+    }
+
+    public Map<String, Integer> getKitMatchesMap() {
+        return kitMatches;
     }
 
     public int getWins() {

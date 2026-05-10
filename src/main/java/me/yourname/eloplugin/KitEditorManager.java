@@ -184,12 +184,18 @@ public class KitEditorManager {
                 inv.setItem(slot++, new ItemStack(mat));
             }
 
-            ItemStack spear = new ItemStack(Material.TRIDENT); // This is just a placeholder, actual spear is in
-                                                               // DefaultKitProvider
+            ItemStack spear = new ItemStack(Material.TRIDENT); // This is just a placeholder, actual spear is in DefaultKitProvider
             ItemMeta sMeta = spear.getItemMeta();
             sMeta.setDisplayName("§3Netherite Spear");
             spear.setItemMeta(sMeta);
             inv.setItem(26, spear);
+
+            ItemStack enchantGuide = new ItemStack(Material.ENCHANTED_BOOK);
+            ItemMeta guideMeta = enchantGuide.getItemMeta();
+            guideMeta.setDisplayName("§d§lHow to Enchant");
+            guideMeta.setLore(Arrays.asList("§7To enchant an item, simply", "§eShift + Right-Click §7it", "§7in your inventory below!"));
+            enchantGuide.setItemMeta(guideMeta);
+            inv.setItem(49, enchantGuide);
 
             inv.setItem(53, DefaultKitProvider.createNamedItem(Material.ARROW, "§aNext Page ->"));
         } else {
@@ -203,6 +209,14 @@ public class KitEditorManager {
                 inv.setItem(slot + 9, DefaultKitProvider.createShulker(Material.PURPLE_SHULKER_BOX, pot));
                 slot++;
             }
+
+            ItemStack enchantGuide = new ItemStack(Material.ENCHANTED_BOOK);
+            ItemMeta guideMeta = enchantGuide.getItemMeta();
+            guideMeta.setDisplayName("§d§lHow to Enchant");
+            guideMeta.setLore(Arrays.asList("§7To enchant an item, simply", "§eShift + Right-Click §7it", "§7in your inventory below!"));
+            enchantGuide.setItemMeta(guideMeta);
+            inv.setItem(49, enchantGuide);
+
             inv.setItem(45, DefaultKitProvider.createNamedItem(Material.ARROW, "§c<- Previous Page"));
         }
         player.openInventory(inv);

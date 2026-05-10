@@ -1,5 +1,6 @@
 package me.yourname.eloplugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -64,8 +65,13 @@ public class KitListener implements Listener {
 
         // Handle GUI interactions
         if (title.startsWith("§8Vanilla Palette")) {
-            event.setCancelled(true);
-            handlePaletteClick(player, event.getCurrentItem(), title);
+            if (event.getClickedInventory() == event.getView().getTopInventory()) {
+                event.setCancelled(true);
+                handlePaletteClick(player, event.getCurrentItem(), title);
+            } else if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                // Prevent shift-clicking items from bottom inventory into the palette
+                event.setCancelled(true);
+            }
             return;
         }
         if (title.startsWith("§8Enchant:")) {
@@ -164,14 +170,23 @@ public class KitListener implements Listener {
     }
 
     private void handlePaletteClick(Player player, ItemStack clicked, String title) {
-        if (clicked == null)
+        if (clicked == null || clicked.getType() == Material.AIR)
             return;
         if (clicked.getType() == Material.ARROW) {
             int page = title.contains("Page 1") ? 2 : 1;
             plugin.getKitEditorManager().openVanillaPalette(player, page);
             return;
         }
-        player.getInventory().addItem(clicked.clone());
+        if (clicked.getType() == Material.ENCHANTED_BOOK && clicked.hasItemMeta() && "§d§lHow to Enchant".equals(clicked.getItemMeta().getDisplayName())) {
+            player.sendMessage("§dTo enchant an item, press Escape to close the palette, then §eShift + Right-Click §dthe item in your inventory.");
+            return;
+        }
+        
+        // Give the item to the cursor so they can place it wherever they want
+        // Using a 1 tick delay to prevent ghost items when cancelling the event
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            player.setItemOnCursor(clicked.clone());
+        });
         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
     }
 

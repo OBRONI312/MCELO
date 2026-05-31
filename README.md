@@ -60,7 +60,7 @@ The plugin starts a web server on port 8081 by default.
 - Spigot/Paper API 1.21.1
 - WorldEdit/FastAsyncWorldEdit API
 - PlaceholderAPI
-- SQLite JDBC
+-
 
 ### Building
 
